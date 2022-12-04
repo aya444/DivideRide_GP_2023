@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>456505514051-2dcf80s9db3lrt1b0a27hr0870q5j3ld.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.456505514051-2dcf80s9db3lrt1b0a27hr0870q5j3ld</string>
+	<key>API_KEY</key>
+	<string>AIzaSyA9v-3oYoNBB2UdJfJ3sxn81J9ctzoS-qI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>456505514051</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.divideRide</string>
+	<key>PROJECT_ID</key>
+	<string>divide-ride-app-b6746</string>
+	<key>STORAGE_BUCKET</key>
+	<string>divide-ride-app-b6746.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:456505514051:ios:79f52721c5769848b75cf6</string>
+</dict>
+</plist>
