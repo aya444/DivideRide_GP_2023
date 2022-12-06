@@ -202,7 +202,6 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                           //homeLatLng: homeAddress,
                           //shoppingLatLng: shoppingAddress
                       );
-                      Get.to(() => HomeScreen());
                     })),
                   ],
                 ),

@@ -2,12 +2,12 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/views/home.dart';
+import 'package:divide_ride/views/login_screen.dart';
 import 'package:divide_ride/views/profile_settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as Path;
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 
@@ -101,14 +101,14 @@ class AuthController extends GetxController {
     });
   }
 
-  var isDecided = false;
+  //var isDecided = false;
 
   decideRoute() {
-    if (isDecided) {
-      return;
-    }
-    isDecided = true;
-    print("called");
+    // if (isDecided) {
+    //   return;
+    // }
+    // isDecided = true;
+    // print("called");
 
     ///step 1- Check user login?
     User? user = FirebaseAuth.instance.currentUser;
@@ -142,6 +142,7 @@ class AuthController extends GetxController {
         print("Error while decideRoute is $e");
       });
     }
+
   }
 
 
@@ -186,19 +187,20 @@ class AuthController extends GetxController {
       'home_address': home,
       'business_address': business,
       'shopping_address': shop,
-    //   'home_latlng': GeoPoint(homeLatLng!.latitude, homeLatLng.longitude),
-    //   'business_latlng':
-    //   GeoPoint(businessLatLng!.latitude, businessLatLng.longitude),
-    //   'shopping_latlng':
-    //   GeoPoint(shoppingLatLng!.latitude, shoppingLatLng.longitude),
-    // },SetOptions(merge: true)).then((value) {
-    //   isProfileUploading(false);
-    //
-    //   Get.to(() => HomeScreen());
-    });
+      //   'home_latlng': GeoPoint(homeLatLng!.latitude, homeLatLng.longitude),
+      //   'business_latlng':
+      //   GeoPoint(businessLatLng!.latitude, businessLatLng.longitude),
+      //   'shopping_latlng':
+      //   GeoPoint(shoppingLatLng!.latitude, shoppingLatLng.longitude),
+      // },SetOptions(merge: true)).then((value) {
+      //   isProfileUploading(false);
+    }).then((value) {
+
+      isProfileUploading(false);
+
+      Get.to(() => HomeScreen());
+
+      });
   }
-
-
-
 
 }
