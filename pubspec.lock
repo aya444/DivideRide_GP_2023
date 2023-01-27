@@ -206,6 +206,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_google_places:
+    dependency: "direct main"
+    description:
+      name: flutter_google_places
+      sha256: e9fb23ceacdc7359aa759627550146f7fd3ae6c067d16f39f3c50d8feebf4809
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -256,6 +264,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.6.5"
+  google_api_headers:
+    dependency: transitive
+    description:
+      name: google_api_headers
+      sha256: ac6f4e27e35c9eb4fbe8ce4ce7380e651d3a7bee3ad4c2ff30e67aaa73f005d3
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0+1"
   google_fonts:
     dependency: "direct main"
     description:
@@ -296,6 +312,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.5"
+  google_maps_webservice:
+    dependency: "direct main"
+    description:
+      name: google_maps_webservice
+      sha256: d0ae4e4508afd74a3f051565261a3cdbae59db29448f9b6e6beb5674545e1eb7
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.20-nullsafety.5"
   http:
     dependency: transitive
     description:
@@ -368,6 +392,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.5"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      sha256: c33da08e136c3df0190bd5bbe51ae1df4a7d96e7954d1d7249fea2968a72d317
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.8.0"
   lints:
     dependency: transitive
     description:
@@ -400,6 +432,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.8.0"
+  package_info_plus:
+    dependency: transitive
+    description:
+      name: package_info_plus
+      sha256: f619162573096d428ccde2e33f92e05b5a179cd6f0e3120c1005f181bee8ed16
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
+  package_info_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: package_info_plus_platform_interface
+      sha256: "9bc8ba46813a4cc42c66ab781470711781940780fd8beddd0c3da62506d3a6c6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   path:
     dependency: transitive
     description:
@@ -536,6 +584,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.4"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      sha256: "2ef8b4e91cb3b55d155e0e34eeae0ac7107974e451495c955ac04ddee8cc21fd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.26.0"
   scrollable_positioned_list:
     dependency: transitive
     description:
