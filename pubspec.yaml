@@ -49,6 +49,8 @@ dependencies:
   cloud_firestore: ^4.1.0
   firebase_storage: ^11.0.6
   google_maps_flutter: ^2.2.3
+  flutter_google_places: ^0.3.0
+  google_maps_webservice:
 
 dev_dependencies:
   flutter_test:
