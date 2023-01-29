@@ -1,3 +1,4 @@
+import 'package:divide_ride/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_google_places/flutter_google_places.dart';
@@ -16,9 +17,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String? _mapStyle;
 
+  AuthController authController=Get.find<AuthController>();
   @override
   void initState() {
     super.initState();
+
+    authController.getUserInfo();
 
     rootBundle.loadString('assets/map_style.txt').then((string) {
       _mapStyle = string;
@@ -67,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
       top: 50,
       left: 20,
       right: 20,
-      child: Container(
+      child: Obx(()=>authController.myUser.value.name == null?Center (child: CircularProgressIndicator(), ):Container(
         width: Get.width,
         child: Row(
           children: [
@@ -76,9 +80,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 40,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    image: DecorationImage(
-                        image: AssetImage('assets/person.png'),
-                        fit: BoxFit.fill))),
+                    image: authController.myUser.value.image == null? DecorationImage(
+                        image: NetworkImage(authController.myUser.value.image!),
+                        fit: BoxFit.fill
+                    ): DecorationImage(
+                        image: NetworkImage(authController.myUser.value.image!),
+                        fit: BoxFit.fill
+                    )
+                )
+            ),
             const SizedBox(
               width: 15,
             ),
@@ -91,7 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         text: 'Welcome Back, ',
                         style: TextStyle(color: Colors.black, fontSize: 14)),
                     TextSpan(
-                        text: 'Name',
+                      //showing the name of the current user
+                        text: authController.myUser.value.name,
                         style: TextStyle(
                             color: Colors.green,
                             fontSize: 15,
@@ -107,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

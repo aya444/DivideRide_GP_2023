@@ -10,6 +10,8 @@ import 'package:get/get.dart';
 import 'package:path/path.dart' as Path;
 import 'package:firebase_storage/firebase_storage.dart';
 
+import '../models/user_model/user_model.dart';
+
 
 class AuthController extends GetxController {
   String userUid = '';
@@ -201,6 +203,17 @@ class AuthController extends GetxController {
       Get.to(() => HomeScreen());
 
       });
+  }
+
+  var myUser= UserModel().obs;
+
+  //this function shows user information on their profile, snapshots to capture any changes on real time
+  //it calls UserModel instance to assert the value of the current user to this instance
+  getUserInfo(){
+    String uid= FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance.collection('users').doc(uid).snapshots().listen((event) {
+      myUser.value= UserModel.fromJson(event.data() !); //now value contains the current user data
+    });
   }
 
 }
