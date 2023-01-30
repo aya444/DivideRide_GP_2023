@@ -17,7 +17,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String? _mapStyle;
 
-  AuthController authController=Get.find<AuthController>();
+  AuthController authController = Get.find<AuthController>();
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: buildDrawer(),
       body: Stack(
         children: [
           Positioned(
@@ -71,7 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
       top: 50,
       left: 20,
       right: 20,
-      child: Obx(()=>authController.myUser.value.name == null?Center (child: CircularProgressIndicator(), ):Container(
+      child: Obx(() =>
+      authController.myUser.value.name == null ? Center(
+        child: CircularProgressIndicator(),) : Container(
         width: Get.width,
         child: Row(
           children: [
@@ -80,10 +84,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 40,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    image: authController.myUser.value.image == null? DecorationImage(
+                    image: authController.myUser.value.image == null
+                        ? DecorationImage(
                         image: NetworkImage(authController.myUser.value.image!),
                         fit: BoxFit.fill
-                    ): DecorationImage(
+                    )
+                        : DecorationImage(
                         image: NetworkImage(authController.myUser.value.image!),
                         fit: BoxFit.fill
                     )
@@ -137,7 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
       apiKey: kGoogleApiKey,
       components: [
         new Component(Component.country, "eg")
-      ], //restrict the search to egypt
+      ],
+      //restrict the search to egypt
       types: [
         "street_number",
         "street_address",
@@ -447,6 +454,134 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               )),
         ),
+      ),
+    );
+  }
+
+  buildDrawerItem(
+      {required String title, required Function onPressed, Color color = Colors
+          .black,
+        double fontSize = 20,
+        FontWeight fontWeight = FontWeight.w700,
+        double height = 45,
+        bool isVisible = false}) {
+    return SizedBox(
+      height: height,
+      child: ListTile(
+
+        contentPadding: EdgeInsets.all(0),
+        // minVerticalPadding: 0,
+        dense: true,
+        onTap: () => onPressed(),
+        title: Text(title, style: GoogleFonts.poppins(
+            fontSize: fontSize, fontWeight: fontWeight, color: color),),
+      ),
+    );
+  }
+
+  // buildDrawer()////////////////////////////////////////////////////
+
+  buildDrawer() {
+    return Drawer(
+      child: Column(
+        children: [
+          Container(
+            height: 150,
+            child: DrawerHeader(
+
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                              image: AssetImage('assets/person.png'),
+                              fit: BoxFit.fill
+                          )
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Good Morning, ',
+                            style: GoogleFonts.poppins(
+                                color: Colors.black.withOpacity(0.28),
+                                fontSize: 14)),
+                        Text(authController.myUser.value.name == null ? "Mark"
+                            : authController.myUser.value.name!,)
+                      ],
+                    )
+                  ],
+                )),
+          ),
+          const SizedBox(height: 20,),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 30),
+            child: Column(
+              children: [
+                buildDrawerItem(title: 'Payment History', onPressed: () {}),
+                buildDrawerItem(title: 'Ride History', onPressed: () {}, isVisible: true),
+                buildDrawerItem(title: 'Invite Friends', onPressed: () {}),
+                buildDrawerItem(title: 'Promo Codes', onPressed: () {}),
+                buildDrawerItem(title: 'Settings', onPressed: () {}),
+                buildDrawerItem(title: 'Support', onPressed: () {}),
+                buildDrawerItem(title: 'Log Out', onPressed: () {}),
+              ],
+            ),
+          ),
+
+          Spacer(),
+          Divider(),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+            child: Column(
+              children: [
+
+                buildDrawerItem(
+                    title: 'Do more',
+                    onPressed: () {},
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black.withOpacity(0.15),
+                    height: 20),
+                const SizedBox(height: 20,),
+                buildDrawerItem(
+                    title: 'Get food delivery',
+                    onPressed: () {},
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black.withOpacity(0.15),
+                    height: 20),
+
+                buildDrawerItem(
+                    title: 'Make money driving',
+                    onPressed: () {},
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black.withOpacity(0.15),
+                    height: 20),
+
+                buildDrawerItem(
+                  title: 'Rate us on store',
+                  onPressed: () {},
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black.withOpacity(0.15),
+                  height: 20,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
       ),
     );
   }
