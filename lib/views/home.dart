@@ -1,4 +1,5 @@
 import 'package:divide_ride/controller/auth_controller.dart';
+import 'package:divide_ride/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_google_places/flutter_google_places.dart';
@@ -458,13 +459,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  //each option inside the side drawer
   buildDrawerItem(
       {required String title, required Function onPressed, Color color = Colors
           .black,
         double fontSize = 20,
         FontWeight fontWeight = FontWeight.w700,
         double height = 45,
-        bool isVisible = false}) {
+        bool isVisible = false})
+  {
     return SizedBox(
       height: height,
       child: ListTile(
@@ -473,8 +476,16 @@ class _HomeScreenState extends State<HomeScreen> {
         // minVerticalPadding: 0,
         dense: true,
         onTap: () => onPressed(),
-        title: Text(title, style: GoogleFonts.poppins(
-            fontSize: fontSize, fontWeight: fontWeight, color: color),),
+        title: Row(
+          children: [
+            Text(title,style: GoogleFonts.poppins(fontSize: fontSize,fontWeight: fontWeight,color:color),),
+            const SizedBox(width: 5,), //for spacing between avatar and option
+
+            //circleAvatar is the circle that contains number of notifications beside the option
+            isVisible ? CircleAvatar(backgroundColor: Colors.redAccent[700],radius: 15,
+                child: Text('1',style: GoogleFonts.poppins(color: Colors.white),),):Container()
+          ],
+        ),
       ),
     );
   }
@@ -499,23 +510,35 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 80,
                       decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          image: DecorationImage(
+                          image: authController.myUser.value.image == null? DecorationImage(
                               image: AssetImage('assets/person.png'),
+                              fit: BoxFit.fill
+                          ): DecorationImage(
+                              image: NetworkImage(authController.myUser.value.image!),
                               fit: BoxFit.fill
                           )
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Good Morning, ',
-                            style: GoogleFonts.poppins(
-                                color: Colors.black.withOpacity(0.28),
-                                fontSize: 14)),
-                        Text(authController.myUser.value.name == null ? "Mark"
-                            : authController.myUser.value.name!,)
-                      ],
+
+                    SizedBox(width: 10,),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Good Morning, ',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.black.withOpacity(0.28),
+                                  fontSize: 14)),
+                          Text(authController.myUser.value.name == null ? "User"
+                              : authController.myUser.value.name!, style: GoogleFonts.poppins(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black), overflow: TextOverflow.ellipsis, maxLines:1,
+                          ),
+                        ],
+                      ),
                     )
                   ],
                 )),
