@@ -1,5 +1,6 @@
 import 'package:divide_ride/controller/auth_controller.dart';
 import 'package:divide_ride/utils/app_colors.dart';
+import 'package:divide_ride/views/my_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_google_places/flutter_google_places.dart';
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   AuthController authController = Get.find<AuthController>();
 
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _mapStyle = string;
     });
   }
+
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
@@ -71,58 +74,66 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget buildProfileTitle() {
     return Positioned(
-      top: 50,
-      left: 20,
-      right: 20,
-      child: Obx(() =>
-      authController.myUser.value.name == null ? Center(
-        child: CircularProgressIndicator(),) : Container(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Obx(() => authController.myUser.value.name == null
+          ? Center(
+        child: CircularProgressIndicator(),
+      )
+          : Container(
         width: Get.width,
+        height: Get.width * 0.5,
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        decoration: BoxDecoration(color: Colors.white70),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: authController.myUser.value.image == null
-                        ? DecorationImage(
-                        image: NetworkImage(authController.myUser.value.image!),
-                        fit: BoxFit.fill
-                    )
-                        : DecorationImage(
-                        image: NetworkImage(authController.myUser.value.image!),
-                        fit: BoxFit.fill
-                    )
-                )
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: authController.myUser.value.image == null
+                      ? DecorationImage(
+                      image: AssetImage('assets/person.png'),
+                      fit: BoxFit.fill)
+                      : DecorationImage(
+                      image: NetworkImage(
+                          authController.myUser.value.image!),
+                      fit: BoxFit.fill)),
             ),
             const SizedBox(
               width: 15,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 RichText(
                   text: TextSpan(children: [
                     TextSpan(
-                        text: 'Welcome Back, ',
-                        style: TextStyle(color: Colors.black, fontSize: 14)),
+                        text: 'Welcome back, ',
+                        style:
+                        TextStyle(color: Colors.black, fontSize: 14)),
                     TextSpan(
-                      //showing the name of the current user
-                        text: authController.myUser.value.name,
+                        text: authController.myUser.value.name?.substring(0,authController.myUser.value.name?.indexOf(' ')),
                         style: TextStyle(
                             color: Colors.green,
-                            fontSize: 15,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold)),
                   ]),
                 ),
-                Text("Where are you going?",
-                    style: TextStyle(
-                        fontSize: 18, //18
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black)),
+                Text(
+                  "Where are you going?",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                )
               ],
-            ),
+            )
           ],
         ),
       )),
@@ -164,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget buildTextField() {
     return Positioned(
-      top: 120, //170
+      top: 170, //170
       left: 20, //20
       right: 20, //20
       child: Container(
@@ -191,14 +202,14 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           },
           style: GoogleFonts.poppins(
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.black, // 0xffA7A7A7
           ),
           decoration: InputDecoration(
             hintText: 'Search for a destination',
             hintStyle: GoogleFonts.poppins(
-                fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black),
+                fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
             suffixIcon: Padding(
               padding: const EdgeInsets.only(left: 10),
               child: Icon(
@@ -214,12 +225,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget buildTextFieldForSource() {
     return Positioned(
-      top: 170, //170
+      top: 230, //170
       left: 20, //20
       right: 20, //20
       child: Container(
         width: Get.width,
-        height: 45,
+        height: 50,
         padding: EdgeInsets.only(left: 15),
         decoration: BoxDecoration(
             color: Colors.white,
@@ -461,95 +472,118 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //each option inside the side drawer
   buildDrawerItem(
-      {required String title, required Function onPressed, Color color = Colors
-          .black,
+      {required String title,
+        required Function onPressed,
+        Color color = Colors.black,
         double fontSize = 20,
         FontWeight fontWeight = FontWeight.w700,
         double height = 45,
-        bool isVisible = false})
-  {
+        bool isVisible = false}) {
     return SizedBox(
       height: height,
       child: ListTile(
-
         contentPadding: EdgeInsets.all(0),
         // minVerticalPadding: 0,
         dense: true,
         onTap: () => onPressed(),
         title: Row(
           children: [
-            Text(title,style: GoogleFonts.poppins(fontSize: fontSize,fontWeight: fontWeight,color:color),),
-            const SizedBox(width: 5,), //for spacing between avatar and option
-
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                  fontSize: fontSize, fontWeight: fontWeight, color: color),
+            ),
+            const SizedBox(
+              width: 5,
+            ),
             //circleAvatar is the circle that contains number of notifications beside the option
-            isVisible ? CircleAvatar(backgroundColor: Colors.redAccent[700],radius: 15,
-                child: Text('1',style: GoogleFonts.poppins(color: Colors.white),),):Container()
+            isVisible
+                ? CircleAvatar(
+              backgroundColor: AppColors.greenColor,
+              radius: 15,
+              child: Text(
+                '1',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            )
+                : Container()
           ],
         ),
       ),
     );
   }
 
-  // buildDrawer()////////////////////////////////////////////////////
 
+// buildDrawer()////////////////////////////////////////////////////
   buildDrawer() {
     return Drawer(
       child: Column(
         children: [
-          Container(
-            height: 150,
-            child: DrawerHeader(
-
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: authController.myUser.value.image == null? DecorationImage(
-                              image: AssetImage('assets/person.png'),
-                              fit: BoxFit.fill
-                          ): DecorationImage(
-                              image: NetworkImage(authController.myUser.value.image!),
-                              fit: BoxFit.fill
-                          )
+          InkWell(
+            onTap: () {
+              Get.to(() => const MyProfile());
+            },
+            child: SizedBox(
+              height: 150,
+              child: DrawerHeader(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: authController.myUser.value.image == null
+                                ? const DecorationImage(
+                                image: AssetImage('assets/person.png'),
+                                fit: BoxFit.fill)
+                                : DecorationImage(
+                                image: NetworkImage(
+                                    authController.myUser.value.image!),
+                                fit: BoxFit.fill)),
                       ),
-                    ),
-
-                    SizedBox(width: 10,),
-
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Good Morning, ',
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Good Morning, ',
+                                style: GoogleFonts.poppins(
+                                    color: Colors.black.withOpacity(0.28),
+                                    fontSize: 14)),
+                            Text(
+                              authController.myUser.value.name == null
+                                  ? "User"
+                                  : authController.myUser.value.name!,
                               style: GoogleFonts.poppins(
-                                  color: Colors.black.withOpacity(0.28),
-                                  fontSize: 14)),
-                          Text(authController.myUser.value.name == null ? "User"
-                              : authController.myUser.value.name!, style: GoogleFonts.poppins(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black), overflow: TextOverflow.ellipsis, maxLines:1,
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                )),
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  )),
+            ),
           ),
-          const SizedBox(height: 20,),
+          const SizedBox(
+            height: 20,
+          ),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 30),
             child: Column(
               children: [
-                buildDrawerItem(title: 'Payment History', onPressed: () {}),
-                buildDrawerItem(title: 'Ride History', onPressed: () {}, isVisible: true),
+                buildDrawerItem(title: 'Payment History', onPressed: () {} ),
+                buildDrawerItem(
+                    title: 'Ride History', onPressed: () {}, isVisible: true),
                 buildDrawerItem(title: 'Invite Friends', onPressed: () {}),
                 buildDrawerItem(title: 'Promo Codes', onPressed: () {}),
                 buildDrawerItem(title: 'Settings', onPressed: () {}),
@@ -558,14 +592,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-
           Spacer(),
           Divider(),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             child: Column(
               children: [
-
                 buildDrawerItem(
                     title: 'Do more',
                     onPressed: () {},
@@ -573,7 +605,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.bold,
                     color: Colors.black.withOpacity(0.15),
                     height: 20),
-                const SizedBox(height: 20,),
+                const SizedBox(
+                  height: 20,
+                ),
                 buildDrawerItem(
                     title: 'Get food delivery',
                     onPressed: () {},
@@ -581,7 +615,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.w500,
                     color: Colors.black.withOpacity(0.15),
                     height: 20),
-
                 buildDrawerItem(
                     title: 'Make money driving',
                     onPressed: () {},
@@ -589,7 +622,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.w500,
                     color: Colors.black.withOpacity(0.15),
                     height: 20),
-
                 buildDrawerItem(
                   title: 'Rate us on store',
                   onPressed: () {},
@@ -608,4 +640,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+
 }
