@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:divide_ride/controller/auth_controller.dart';
 import 'package:divide_ride/utils/app_colors.dart';
 import 'package:divide_ride/views/my_profile.dart';
@@ -8,6 +10,10 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
+import 'package:geocoding/geocoding.dart' as geoCoding;
+import 'dart:ui' as ui;
+
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -21,6 +27,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   AuthController authController = Get.find<AuthController>();
 
+  late LatLng destination;
+  late LatLng source;
+
+
+  // saving all the markers that will be showing on the map and store them in this set
+  Set<Marker> markers = Set<Marker>();
+
+
 
   @override
   void initState() {
@@ -31,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     rootBundle.loadString('assets/map_style.txt').then((string) {
       _mapStyle = string;
     });
+    
   }
 
 
@@ -53,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
             right: 0,
             bottom: 0,
             child: GoogleMap(
+              markers: markers,
               zoomControlsEnabled: false,
               onMapCreated: (GoogleMapController controller) {
                 myMapController = controller;
@@ -197,6 +213,24 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () async {
             String selectedPlace = await showGoogleAutoComplete();
             destinationController.text = selectedPlace;
+
+            List<geoCoding.Location> locations = await geoCoding.locationFromAddress(selectedPlace);
+
+            destination = LatLng(locations.first.latitude, locations.first.longitude);
+
+            markers.add(Marker(
+              markerId: MarkerId(selectedPlace),
+              infoWindow: InfoWindow(
+                title: 'Destination: $selectedPlace',
+              ),
+              position: destination,
+            ));
+
+            myMapController!.animateCamera(CameraUpdate.newCameraPosition(
+                CameraPosition(target: destination, zoom: 14)
+              //17 is new zoom level
+            ));
+
             setState(() {
               showSourceField = true;
             });
@@ -348,7 +382,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Get.back();
                       String place = await showGoogleAutoComplete();
                       sourceController.text = place;
+
+
                     },
+
                     child: Center(
                       child: Container(
                         width: Get.width,
@@ -382,11 +419,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ));
-            // String selectedPlace = await showGoogleAutoComplete();
-            // destinationController.text = selectedPlace;
-            // setState(() {
-            //   showSourceField = true;
-            // });
+
           },
           style: GoogleFonts.poppins(
             fontSize: 14,
@@ -639,7 +672,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+
+
+
   }
+
 
 
 }
