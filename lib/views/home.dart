@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late LatLng destination;
   late LatLng source;
+  final Set<Polyline> _polyline = {};
 
 
   // saving all the markers that will be showing on the map and store them in this set
@@ -45,7 +46,8 @@ class _HomeScreenState extends State<HomeScreen> {
     rootBundle.loadString('assets/map_style.txt').then((string) {
       _mapStyle = string;
     });
-    
+    loadCustomMarker();
+
   }
 
 
@@ -69,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
             bottom: 0,
             child: GoogleMap(
               markers: markers,
+              polylines: _polyline,
               zoomControlsEnabled: false,
               onMapCreated: (GoogleMapController controller) {
                 myMapController = controller;
@@ -224,6 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: 'Destination: $selectedPlace',
               ),
               position: destination,
+              icon: BitmapDescriptor.fromBytes(markIcons),
             ));
 
             myMapController!.animateCamera(CameraUpdate.newCameraPosition(
@@ -382,7 +386,33 @@ class _HomeScreenState extends State<HomeScreen> {
                       Get.back();
                       String place = await showGoogleAutoComplete();
                       sourceController.text = place;
+                      List<geoCoding.Location> locations = await geoCoding.locationFromAddress(place);
 
+                      source = LatLng(locations.first.latitude, locations.first.longitude);
+
+                      if(markers.length>=2){
+                        markers.remove(markers.last);
+                      }
+
+                      markers.add(Marker(
+                        markerId: MarkerId(place),
+                        infoWindow: InfoWindow(
+                          title: 'Source: $place',
+                        ),
+                        position: source,
+                      ));
+
+                      drawPolyline(place);
+
+                      myMapController!.animateCamera( //so when the source is entered the map camera goes to it
+                          CameraUpdate.newCameraPosition(
+                              CameraPosition(target: source, zoom: 14)
+                            //17 is new zoom level
+                          ));
+
+                      setState(() {
+
+                      });
 
                     },
 
@@ -672,11 +702,30 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-
-
-
   }
 
+  late Uint8List markIcons;
+  loadCustomMarker() async {
+    markIcons = await loadAsset('assets/dest_marker.png', 100);
+  }
+
+  Future<Uint8List> loadAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetHeight: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+  }
+
+  void drawPolyline(String placeId) {
+    _polyline.clear(); // clear in case it has multiple data so it doesn't miss up
+    _polyline.add(Polyline(
+      polylineId: PolylineId(placeId),
+      visible: true,
+      points: [source, destination],
+      color: AppColors.greenColor,
+      width: 5,
+    ));
+  }
 
 
 }
