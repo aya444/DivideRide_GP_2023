@@ -52,6 +52,7 @@ dependencies:
   flutter_google_places: ^0.3.0
   google_maps_webservice:
   geocoding: ^2.0.5
+  flutter_credit_card: ^3.0.5
 
 dev_dependencies:
   flutter_test:

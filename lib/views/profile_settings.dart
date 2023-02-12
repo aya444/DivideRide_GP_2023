@@ -119,7 +119,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                       height: 10,
                     ),
                     TextFieldWidget(
-                        'Home Address', Icons.home_outlined, homeController,(String? input){
+                      'Home Address', Icons.home_outlined, homeController,(String? input){
 
                       if(input!.isEmpty){
                         return 'Home Address is required!';
@@ -141,38 +141,38 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                       height: 10,
                     ),
                     TextFieldWidget('Business Address', Icons.card_travel,
-                        businessController,(String? input){
-                          if(input!.isEmpty){
-                            return 'Business Address is required!';
-                          }
+                      businessController,(String? input){
+                        if(input!.isEmpty){
+                          return 'Business Address is required!';
+                        }
 
-                          return null;
-                        },onTap: ()async{
-                          //Prediction? p = await  authController.showGoogleAutoComplete(context);
+                        return null;
+                      },onTap: ()async{
+                        //Prediction? p = await  authController.showGoogleAutoComplete(context);
 
-                          /// now let's translate this selected address and convert it to latlng obj
-                          //businessAddress = await authController.buildLatLngFromAddress(p!.description!);
-                          //businessController.text = p.description!;
-                          ///store this information into firebase together once update is clicked
-                        },/*readOnly: true*/),
+                        /// now let's translate this selected address and convert it to latlng obj
+                        //businessAddress = await authController.buildLatLngFromAddress(p!.description!);
+                        //businessController.text = p.description!;
+                        ///store this information into firebase together once update is clicked
+                      },/*readOnly: true*/),
                     const SizedBox(
                       height: 10,
                     ),
                     TextFieldWidget('Shopping Center',
-                        Icons.shopping_cart_outlined, shopController,(String? input){
-                          if(input!.isEmpty){
-                            return 'Shopping Center is required!';
-                          }
+                      Icons.shopping_cart_outlined, shopController,(String? input){
+                        if(input!.isEmpty){
+                          return 'Shopping Center is required!';
+                        }
 
-                          return null;
-                        },onTap: ()async{
-                          //Prediction? p = await  authController.showGoogleAutoComplete(context);
+                        return null;
+                      },onTap: ()async{
+                        //Prediction? p = await  authController.showGoogleAutoComplete(context);
 
-                          /// now let's translate this selected address and convert it to latlng obj
-                          //shoppingAddress = await authController.buildLatLngFromAddress(p!.description!);
-                          //shopController.text = p.description!;
-                          ///store this information into firebase together once update is clicked
-                        },/*readOnly: true*/),
+                        /// now let's translate this selected address and convert it to latlng obj
+                        //shoppingAddress = await authController.buildLatLngFromAddress(p!.description!);
+                        //shopController.text = p.description!;
+                        ///store this information into firebase together once update is clicked
+                      },/*readOnly: true*/),
                     const SizedBox(
                       height: 30,
                     ),
@@ -193,14 +193,14 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                       }
                       authController.isProfileUploading(true);
                       authController.storeUserInfo(
-                          selectedImage!,
-                          nameController.text,
-                          homeController.text,
-                          businessController.text,
-                          shopController.text,
-                          //businessLatLng: businessAddress,
-                          //homeLatLng: homeAddress,
-                          //shoppingLatLng: shoppingAddress
+                        selectedImage!,
+                        nameController.text,
+                        homeController.text,
+                        businessController.text,
+                        shopController.text,
+                        //businessLatLng: businessAddress,
+                        //homeLatLng: homeAddress,
+                        //shoppingLatLng: shoppingAddress
                       );
                     })),
                   ],

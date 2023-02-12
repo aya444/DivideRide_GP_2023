@@ -1,16 +1,19 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:divide_ride/models/user_model/user_model.dart';
 import 'package:divide_ride/views/home.dart';
-import 'package:divide_ride/views/login_screen.dart';
 import 'package:divide_ride/views/profile_settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:path/path.dart' as Path;
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:geocoding/geocoding.dart' as geoCoding;
+import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_webservice/places.dart';
+import 'package:path/path.dart' as Path;
 
-import '../models/user_model/user_model.dart';
 
 
 class AuthController extends GetxController {
@@ -24,15 +27,28 @@ class AuthController extends GetxController {
 
   bool isLoginAsDriver = false;
 
-// storeUserCard(String number, String expiry, String cvv, String name) async {
-//   await FirebaseFirestore.instance
-//       .collection('users')
-//       .doc(FirebaseAuth.instance.currentUser!.uid)
-//       .collection('cards')
-//       .add({'name': name, 'number': number, 'cvv': cvv, 'expiry': expiry});
-//
-//   return true;
-// }
+  storeUserCard(String number, String expiry, String cvv, String name) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('cards')
+        .add({'name': name, 'number': number, 'cvv': cvv, 'expiry': expiry});
+
+    return true;
+  }
+
+  RxList userCards = [].obs;
+
+  getUserCards() {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid).collection('cards')
+        .snapshots().listen((event) {
+      userCards.value = event.docs;
+    });
+  }
+
+
 //   CountdownController countdownController = CountdownController();
 //   TextEditingController otpEditingController = TextEditingController();
 //   var messageOtpCode = ''.obs;
@@ -174,9 +190,9 @@ class AuthController extends GetxController {
       String business,
       String shop, {
         String url = '',
-        //LatLng? homeLatLng,
-        //LatLng? businessLatLng,
-        //LatLng? shoppingLatLng,
+        LatLng? homeLatLng,
+        LatLng? businessLatLng,
+        LatLng? shoppingLatLng,
       }) async {
     String url_new = url;
     if (selectedImage != null) {
@@ -189,31 +205,65 @@ class AuthController extends GetxController {
       'home_address': home,
       'business_address': business,
       'shopping_address': shop,
-      //   'home_latlng': GeoPoint(homeLatLng!.latitude, homeLatLng.longitude),
-      //   'business_latlng':
-      //   GeoPoint(businessLatLng!.latitude, businessLatLng.longitude),
-      //   'shopping_latlng':
-      //   GeoPoint(shoppingLatLng!.latitude, shoppingLatLng.longitude),
-      // },SetOptions(merge: true)).then((value) {
-      //   isProfileUploading(false);
-    }).then((value) {
-
+      'home_latlng': GeoPoint(homeLatLng!.latitude, homeLatLng.longitude),
+      'business_latlng':
+      GeoPoint(businessLatLng!.latitude, businessLatLng.longitude),
+      'shopping_latlng':
+      GeoPoint(shoppingLatLng!.latitude, shoppingLatLng.longitude),
+    },SetOptions(merge: true)).then((value) {
       isProfileUploading(false);
 
       Get.to(() => HomeScreen());
-
-      });
+    });
   }
 
-  var myUser= UserModel().obs;
+  var myUser= UserModel().obs;  /// all information of user is stored in myUser
 
   //this function shows user information on their profile, snapshots to capture any changes on real time
   //it calls UserModel instance to assert the value of the current user to this instance
-  getUserInfo(){
-    String uid= FirebaseAuth.instance.currentUser!.uid;
-    FirebaseFirestore.instance.collection('users').doc(uid).snapshots().listen((event) {
-      myUser.value= UserModel.fromJson(event.data() !); //now value contains the current user data
+  getUserInfo() {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .listen((event) {
+      myUser.value = UserModel.fromJson(event.data()!);
     });
+  }
+
+  Future<Prediction?> showGoogleAutoComplete(BuildContext context) async {
+    const kGoogleApiKey = "AIzaSyC8j9kfawLk8lGQZxOiWV-33h36nrxfs44";
+
+    Prediction? p = await PlacesAutocomplete.show(
+      //Prediction is nullable in case a non existed place is searched for
+      offset: 0,
+      radius: 1000,
+      strictbounds: false,
+      region: "eg",
+      language: "en",
+      context: context,
+      mode: Mode.overlay,
+      apiKey: kGoogleApiKey,
+      components: [
+        new Component(Component.country, "eg")
+      ],
+      //restrict the search to egypt
+      types: [
+        // "street_number",
+        // "street_address",
+        // "route",
+        // "locality",
+        // "sublocality"
+      ],
+      hint: "Search City",
+    );
+    return p;
+  }
+
+  Future<LatLng> buildLatLngFromAddress(String place) async {
+    List<geoCoding.Location> locations = await geoCoding.locationFromAddress(place);
+    return LatLng(locations.first.latitude, locations.first.longitude);
   }
 
 }
