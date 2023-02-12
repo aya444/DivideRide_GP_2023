@@ -14,6 +14,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:path/path.dart' as Path;
 
+import '../views/driver/profile_setup.dart';
+
 
 
 class AuthController extends GetxController {
@@ -119,14 +121,14 @@ class AuthController extends GetxController {
     });
   }
 
-  //var isDecided = false;
+  // var isDecided = false;
 
   decideRoute() {
     // if (isDecided) {
     //   return;
     // }
     // isDecided = true;
-    // print("called");
+    print("called");
 
     ///step 1- Check user login?
     User? user = FirebaseAuth.instance.currentUser;
@@ -139,21 +141,23 @@ class AuthController extends GetxController {
           .doc(user.uid)
           .get()
           .then((value) {
-        ///if condition is true this means userprofile is exist else it doesn't exist
-        if (value.exists) {
-          Get.to(() => HomeScreen());
-        } else {
-          Get.to(() => ProfileSettingScreen());
-        }
 
-        ///isLoginAsDriver == true means navigate it to driver module
-        // if(isLoginAsDriver){
-        //
-        //   if (value.exists) {
-        //     print("Driver HOme Screen");
-        //   } else {
-        //     //Get.offAll(() => DriverProfileSetup());
-        //   }
+        if(isLoginAsDriver){
+
+          if (value.exists) {
+            print("Driver HOme Screen");
+          } else {
+            Get.offAll(() => DriverProfileSetup());
+          }
+
+
+        }else{
+          if (value.exists) {
+            Get.offAll(() => HomeScreen());
+          } else {
+            Get.offAll(() => ProfileSettingScreen());
+          }
+        }
 
 
       }).catchError((e) {
@@ -266,4 +270,46 @@ class AuthController extends GetxController {
     return LatLng(locations.first.latitude, locations.first.longitude);
   }
 
+ //NEW
+  storeDriverProfile(
+      File? selectedImage,
+      String name,
+      String email, {
+        String url = '',
+
+      }) async {
+    String url_new = url;
+    if (selectedImage != null) {
+      url_new = await uploadImage(selectedImage);
+    }
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'image': url_new,
+      'name': name,
+      'email': email,
+      'isDriver': true
+    },SetOptions(merge: true)).then((value) {
+      isProfileUploading(false);
+
+      // Get.off(()=> CarRegistrationTemplate());
+
+
+
+    });
+  }
+
+
+
+  Future<bool> uploadCarEntry(Map<String,dynamic> carData)async{
+    bool isUploaded = false;
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+
+    await FirebaseFirestore.instance.collection('users').doc(uid).set(carData,SetOptions(merge: true));
+
+    isUploaded = true;
+
+    return isUploaded;
+  }
+
 }
+
