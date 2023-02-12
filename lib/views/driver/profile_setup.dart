@@ -1,41 +1,31 @@
 import 'dart:io';
-import 'package:divide_ride/controller/auth_controller.dart';
-import 'package:divide_ride/utils/app_colors.dart';
-import 'package:divide_ride/views/home.dart';
-import 'package:divide_ride/widgets/green_intro_widget.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_webservice/places.dart';
+import 'package:divide_ride/controller/auth_controller.dart';
+import 'package:divide_ride/utils/app_colors.dart';
+import 'package:divide_ride/widgets/green_intro_widget.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as Path;
 
-
-
-class ProfileSettingScreen extends StatefulWidget {
-  const ProfileSettingScreen({Key? key}) : super(key: key);
+class DriverProfileSetup extends StatefulWidget {
+  const DriverProfileSetup({Key? key}) : super(key: key);
 
   @override
-  State<ProfileSettingScreen> createState() => _ProfileSettingScreenState();
+  State<DriverProfileSetup> createState() => _DriverProfileSetupState();
 }
 
-class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
+class _DriverProfileSetupState extends State<DriverProfileSetup> {
   TextEditingController nameController = TextEditingController();
-  TextEditingController homeController = TextEditingController();
-  TextEditingController businessController = TextEditingController();
-  TextEditingController shopController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  AuthController authController = Get.find<AuthController>();  //Get.find<AuthController>();
+  AuthController authController = Get.find<AuthController>();
 
   final ImagePicker _picker = ImagePicker();
   File? selectedImage;
 
-  late LatLng homeAddress;
-  late LatLng businessAddress;
-  late LatLng shoppingAddress;
-  getImage(ImageSource source) async { ///picking an image from the source which means either from the gallery or the camera
+  getImage(ImageSource source) async {
     final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
       selectedImage = File(image.path);
@@ -55,7 +45,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
               height: Get.height * 0.4,
               child: Stack(
                 children: [
-                  greenIntroWidgetWithoutLogos(),
+                  greenIntroWidgetWithoutLogos(title: 'Let’s Get Started!',subtitle: 'Complete the profile Details'),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: InkWell(
@@ -68,13 +58,16 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                         height: 120,
                         margin: EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withOpacity(0.1),spreadRadius: 1,blurRadius: 2)
+                            ],
                             shape: BoxShape.circle,
-                            color: Color(0xffD6D6D6)),
+                            color:Colors.white),
                         child: Center(
                           child: Icon(
                             Icons.camera_alt_outlined,
                             size: 40,
-                            color: Colors.white,
+                            color: Colors.black,
                           ),
                         ),
                       )
@@ -87,7 +80,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                                 image: FileImage(selectedImage!),
                                 fit: BoxFit.fill),
                             shape: BoxShape.circle,
-                            color: Color(0xffD6D6D6)),
+                            color: Colors.white),
                       ),
                     ),
                   ),
@@ -95,7 +88,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
               ),
             ),
             const SizedBox(
-              height: 20,
+              height: 80,
             ),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 23),
@@ -110,7 +103,7 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                         return 'Name is required!';
                       }
 
-                      if(input.length<3){
+                      if(input.length<5){
                         return 'Please enter a valid name!';
                       }
 
@@ -121,60 +114,25 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                       height: 10,
                     ),
                     TextFieldWidget(
-                      'Home Address', Icons.home_outlined, homeController,(String? input){
+
+                        'Email', Icons.email, emailController,(String? input){
 
                       if(input!.isEmpty){
-                        return 'Home Address is required!';
+                        return 'Email is required!';
+                      }
+
+                      if(!input.isEmail){
+                        return 'Enter valid email.';
                       }
 
                       return null;
 
                     },onTap: ()async{
-                      Prediction? p = await  authController.showGoogleAutoComplete(context);
-
-                      /// now let's translate this selected address and convert it to latlng obj
-                      homeAddress = await authController.buildLatLngFromAddress(p!.description!);
-                      homeController.text = p.description!;
-                      ///store this information into firebase together once update is clicked
 
 
-                    },readOnly: true),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextFieldWidget('Business Address', Icons.card_travel,
-                      businessController,(String? input){
-                        if(input!.isEmpty){
-                          return 'Business Address is required!';
-                        }
 
-                        return null;
-                      },onTap: ()async{
-                        Prediction? p = await  authController.showGoogleAutoComplete(context);
+                    },readOnly: false),
 
-                        /// now let's translate this selected address and convert it to latlng obj
-                        businessAddress = await authController.buildLatLngFromAddress(p!.description!);
-                        businessController.text = p.description!;
-                        ///store this information into firebase together once update is clicked
-                      },readOnly: true),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextFieldWidget('Shopping Center',
-                      Icons.shopping_cart_outlined, shopController,(String? input){
-                        if(input!.isEmpty){
-                          return 'Shopping Center is required!';
-                        }
-
-                        return null;
-                      },onTap: ()async{
-                        Prediction? p = await  authController.showGoogleAutoComplete(context);
-
-                        /// now let's translate this selected address and convert it to latlng obj
-                        shoppingAddress = await authController.buildLatLngFromAddress(p!.description!);
-                        shopController.text = p.description!;
-                        ///store this information into firebase together once update is clicked
-                      },readOnly: true),
                     const SizedBox(
                       height: 30,
                     ),
@@ -194,15 +152,12 @@ class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
                         return;
                       }
                       authController.isProfileUploading(true);
-                      authController.storeUserInfo(
+                      authController.storeDriverProfile(
                         selectedImage!,
                         nameController.text,
-                        homeController.text,
-                        businessController.text,
-                        shopController.text,
-                        businessLatLng: businessAddress,
-                        homeLatLng: homeAddress,
-                        shoppingLatLng: shoppingAddress
+                        emailController.text,
+
+
                       );
                     })),
                   ],
