@@ -1,3 +1,5 @@
+
+import 'package:divide_ride/views/decision_screens/decision_screen.dart';
 import 'package:divide_ride/views/home.dart';
 import 'package:divide_ride/views/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,7 +30,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(textTheme),
       ),
-      home: LoginScreen(),
+      home: DecisionScreen(),
     );
   }
 }
