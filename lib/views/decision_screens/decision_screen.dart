@@ -8,7 +8,7 @@ import 'package:get/get_core/src/get_main.dart';
 
 import '../../widgets/green_intro_widget.dart';
 
-class DecisionScreen extends StatelessWidget{
+class DecisionScreen extends StatelessWidget {
   DecisionScreen({Key? key}) : super(key: key);
 
   AuthController authController = Get.find<AuthController>();
@@ -21,32 +21,27 @@ class DecisionScreen extends StatelessWidget{
         child: Column(
           children: [
             greenIntroWidget(),
+            const SizedBox(
+              height: 50,
+            ),
+            DecisionButton('assets/driver.png', 'Login As Driver', () {
+              authController.isLoginAsDriver = true;
+              Get.to(() => LoginScreen());
 
-            const SizedBox(height: 50,),
-            DecisionButton(
-                'assets/driver.png',
-                'Login As Driver',
-                    (){
-                  // authController.isLoginAsDriver = true;
-                  // Get.to(()=> LoginScreen());
-                      Get.to(()=> CarRegistrationTemplate());
-                    },
-                Get.width*0.8
+            },
+                Get.width * 0.8),
+            const SizedBox(
+              height: 20,
             ),
-            const SizedBox(height: 20,),
-            DecisionButton(
-                'assets/customer.png',
-                'Login As User',
-                    (){
-                      authController.isLoginAsDriver = false;
-                      Get.to(()=> LoginScreen());
-                    },
-                Get.width*0.8
-            ),
+            DecisionButton('assets/customer.png', 'Login As User', () {
+              authController.isLoginAsDriver = false;
+              Get.to(() => LoginScreen());
+
+            },
+                Get.width * 0.8),
           ],
         ),
       ),
     );
   }
-
 }
