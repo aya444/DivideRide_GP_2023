@@ -14,6 +14,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:path/path.dart' as Path;
 
+import '../views/driver/car_registration/car_registration_template.dart';
 import '../views/driver/profile_setup.dart';
 
 
@@ -291,10 +292,7 @@ class AuthController extends GetxController {
     },SetOptions(merge: true)).then((value) {
       isProfileUploading(false);
 
-      // Get.off(()=> CarRegistrationTemplate());
-
-
-
+      Get.off(()=> CarRegistrationTemplate());
     });
   }
 

@@ -1,4 +1,5 @@
 import 'package:divide_ride/controller/auth_controller.dart';
+import 'package:divide_ride/views/driver/car_registration/car_registration_template.dart';
 import 'package:divide_ride/views/login_screen.dart';
 import 'package:divide_ride/widgets/my_button.dart';
 import 'package:flutter/material.dart';
@@ -26,8 +27,9 @@ class DecisionScreen extends StatelessWidget{
                 'assets/driver.png',
                 'Login As Driver',
                     (){
-                  authController.isLoginAsDriver = true;
-                  Get.to(()=> LoginScreen());
+                  // authController.isLoginAsDriver = true;
+                  // Get.to(()=> LoginScreen());
+                      Get.to(()=> CarRegistrationTemplate());
                     },
                 Get.width*0.8
             ),
