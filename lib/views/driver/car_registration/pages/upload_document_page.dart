@@ -55,7 +55,7 @@ class _UploadDocumentPageState extends State<UploadDocumentPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.cloud_upload,size: 40,color: Color(0xff7D7D7D),),
+                Icon(selectedImage == null?Icons.cloud_upload : IconData(0xe156, fontFamily: 'MaterialIcons'),size: 40,color: Color(0xff7D7D7D),),
 
                 Text(selectedImage == null?'Tap here to upload ': 'Document is selected.',style: TextStyle(fontSize: 14,fontWeight: FontWeight.w500,color: Color(0xff7D7D7D)),),
               ],

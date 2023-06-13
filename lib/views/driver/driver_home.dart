@@ -1,10 +1,19 @@
 import 'dart:typed_data';
+
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/controller/auth_controller.dart';
 import 'package:divide_ride/controller/polyline_handler.dart';
+import 'package:divide_ride/controller/ride_controller.dart';
 import 'package:divide_ride/utils/app_colors.dart';
 import 'package:divide_ride/views/decision_screens/decision_screen.dart';
+import 'package:divide_ride/views/driver/driver_profile.dart';
 import 'package:divide_ride/views/my_profile.dart';
+import 'package:divide_ride/views/my_rides.dart';
 import 'package:divide_ride/views/payment.dart';
+import 'package:divide_ride/views/rides_view.dart';
+import 'package:divide_ride/widgets/green_button.dart';
+import 'package:divide_ride/widgets/icon_title_widget.dart';
 import 'package:divide_ride/widgets/text_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,21 +26,23 @@ import 'package:google_maps_webservice/places.dart';
 import 'package:geocoding/geocoding.dart' as geoCoding;
 import 'dart:ui' as ui;
 
-import 'my_rides.dart';
 
 
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class DriverHomeScreen extends StatefulWidget {
+  const DriverHomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<DriverHomeScreen> createState() => _DriverHomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _DriverHomeScreenState extends State<DriverHomeScreen> {
   String? _mapStyle;
+  DateTime? date = DateTime.now();
 
   AuthController authController = Get.find<AuthController>();
+  RideController rideController = Get.find<RideController>();
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
 
   late LatLng destination;
   late LatLng source;
@@ -48,20 +59,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
-
   @override
   void initState() {
     super.initState();
 
-    authController.getUserInfo();
+    authController.getDriverInfo();
 
     rootBundle.loadString('assets/map_style.txt').then((string) {
       _mapStyle = string;
     });
 
+    timeController.text = '${date!.hour}:${date!.minute}:${date!.second}';
+    dateController.text = '${date!.day}-${date!.month}-${date!.year}';
+
     loadCustomMarker();
 
   }
+
 
   String dropdownValue = '**** **** **** 8789';
   static const CameraPosition _kGooglePlex = CameraPosition(
@@ -75,32 +89,40 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: buildDrawer(),
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: GoogleMap(
-              markers: markers,
-              polylines: _polyline,
-              zoomControlsEnabled: false,
-              onMapCreated: (GoogleMapController controller) {
-                myMapController = controller;
-                myMapController!.setMapStyle(_mapStyle);
-              },
-              initialCameraPosition: _kGooglePlex,
+      body: Container(
+          child:Form(
+          key: formKey,
+          child: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: GoogleMap(
+                markers: markers,
+                polylines: _polyline,
+                zoomControlsEnabled: false,
+                onMapCreated: (GoogleMapController controller) {
+                  myMapController = controller;
+                  myMapController!.setMapStyle(_mapStyle);
+                },
+                initialCameraPosition: _kGooglePlex,
+              ),
             ),
-          ),
-          buildProfileTitle(),
-          buildTextField(),
-          showSourceField ? buildTextFieldForSource() : Container(),
-          buildCurrentLocationIcon(),
-          buildNotificationIcon(),
-          buildBottomSheet(),
-        ],
+             buildProfileTitle(),
+             buildTextField(),
+             showSourceField ? buildTextFieldForSource() : Container(),
+             showDateTimeFields ? buildDateTimeFields() : Container(),
+             showDateTimeFields ? buildMaxSeatsAndPriceFields() : Container(),
+             showDateTimeFields ? buildConfirmButton() : Container(),
+            //buildCurrentLocationIcon(),
+            //buildNotificationIcon(),
+            //buildBottomSheet(),
+          ],
+        ),
       ),
+    ),
     );
   }
 
@@ -109,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
       top: 0,
       left: 0,
       right: 0,
-      child: Obx(() => authController.myUser.value.name == null
+      child: Obx(() => authController.myDriver.value.name == null
           ? Center(
         child: CircularProgressIndicator(),
       )
@@ -127,13 +149,13 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 70,
               decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  image: authController.myUser.value.image == null
+                  image: authController.myDriver.value.image == null
                       ? DecorationImage(
                       image: AssetImage('assets/person.png'),
                       fit: BoxFit.fill)
                       : DecorationImage(
                       image: NetworkImage(
-                          authController.myUser.value.image!),
+                          authController.myDriver.value.image!),
                       fit: BoxFit.fill)),
             ),
             const SizedBox(
@@ -150,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style:
                         TextStyle(color: Colors.black, fontSize: 14)),
                     TextSpan(
-                        text: authController.myUser.value.name?.substring(0,authController.myUser.value.name?.indexOf(' ')),
+                        text: authController.myDriver.value.name?.substring(0,authController.myDriver.value.name?.indexOf(' ')),
                         style: TextStyle(
                             color: Colors.green,
                             fontSize: 16,
@@ -158,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ]),
                 ),
                 Text(
-                  "Where are you going?",
+                  "Create your ride",
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -174,9 +196,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
+  TimeOfDay startTime = TimeOfDay(hour: 0, minute: 0);
+
   TextEditingController destinationController = TextEditingController();
   TextEditingController sourceController = TextEditingController();
+  TextEditingController dateController = TextEditingController();
+  TextEditingController timeController = TextEditingController();
+  TextEditingController priceController = TextEditingController();
+  TextEditingController maxSeatsController = TextEditingController();
+  TextEditingController startTimeController = TextEditingController();
+
+
   bool showSourceField = false;
+  bool showDateTimeFields = false;
+  String? maxSeats = '1 seat';
+  List<String> maxSeatsList = [
+    '1 seat',
+    '2 seats',
+    '3 seats',
+    '4 seats',
+  ];
 
   Widget buildTextField() {
     return Positioned(
@@ -227,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
               //17 is new zoom level
             ));
 
-            setState(() {
+            if(mounted) setState(() {
               showSourceField = true;
             });
           },
@@ -278,12 +317,41 @@ class _HomeScreenState extends State<HomeScreen> {
           readOnly: true,
           onTap: () async {
 
-            buildSourceSheet();
+            //buildSourceSheet();
+            Get.back();
+            Prediction? p =
+            await authController.showGoogleAutoComplete(context);
+
+            String place = p!.description!;
+
+            sourceController.text = place;
+
+            source = await authController.buildLatLngFromAddress(place);
+
+            if (markers.length >= 2) {
+              markers.remove(markers.last);
+            }
+            markers.add(Marker(
+                markerId: MarkerId(place),
+                infoWindow: InfoWindow(
+                  title: 'Source: $place',
+                ),
+                position: source));
+
+            await getPolylines(source, destination);
+
+            drawPolyline(place);
+
+            myMapController!.animateCamera(CameraUpdate.newCameraPosition(
+                CameraPosition(target: source, zoom: 14)));
+            if(mounted) setState(() {
+              showDateTimeFields = true;
+            });
 
           },
           style: GoogleFonts.poppins(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
             color: Colors.black, // 0xffA7A7A7
           ),
           decoration: InputDecoration(
@@ -300,6 +368,259 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget buildDateTimeFields(){
+    return Positioned(
+      top: 290, //170
+      left: 20, //20
+      right: 20, //20
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          iconTitleContainer(
+            isReadOnly: true,
+            path: 'assets/date.png',
+            text: 'Date',
+            controller: dateController,
+            validator: (input) {
+              if (date == null) {
+                Get.snackbar('Warning', "Date is required.",
+                    colorText: Colors.white,
+                    backgroundColor: AppColors.greenColor);
+                return '';
+              }
+              return null;
+            },
+            onPress: () {
+              _selectDate(context);
+            },
+          ),
+
+          iconTitleContainer(
+              path: 'assets/time.png',
+              text: 'Start Time',
+              controller: startTimeController,
+              isReadOnly: true,
+              width : 170,
+              validator: (input) {
+                if (input.isEmpty) {
+                  Get.snackbar('Warning', "Time is required.",
+                      colorText: Colors.white,
+                      backgroundColor: AppColors.greenColor);
+                  return '';
+                }
+                return null;
+              },
+              onPress: () {
+                startTimeMethod(context);
+              }),
+        ],
+      ),
+    );
+  }
+
+  Widget buildMaxSeatsAndPriceFields(){
+    return Positioned(
+      top: 340, //170
+      left: 20, //20
+      right: 20, //20
+      child: Column(
+        children: [
+          // Container(
+          //   alignment: Alignment.topLeft,
+          //   child: Text(
+          //     'Who can invite?',
+          //     style: TextStyle(
+          //       fontSize: 16,
+          //       fontWeight: FontWeight.w700,
+          //     ),
+          //   ),
+          // ),
+          // SizedBox(
+          //   height: Get.height * 0.005,
+          // ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.only(left: 10, right: 10),
+                width: 150,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        spreadRadius: 4,
+                        blurRadius: 10)
+                  ],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(width: 1, color: AppColors.genderTextColor),
+                ),
+                // decoration: BoxDecoration(
+                //
+                //   // borderRadius: BorderRadius.circular(8),
+                //    border: Border(
+                //         bottom: BorderSide(color: Colors.black.withOpacity(0.8),width: 0.6)
+                //     )
+                //
+                // ),
+                child: DropdownButton(
+                  isExpanded: true,
+                  underline: Container(
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  icon: Image.asset('assets/arrowDown.png'),
+                  elevation: 16,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.blackColor,
+                  ),
+
+                  value: maxSeats,
+                  onChanged: (String? newValue) {
+                    if(mounted) setState(
+                          () {
+                        maxSeats = newValue!;
+                      },
+                    );
+                  },
+                  items: maxSeatsList
+                      .map( (value) => DropdownMenuItem(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.blackColor,
+                        ),
+                      ),
+                    )
+                  ).toList(),
+                ),
+              ),
+
+              iconTitleContainer(
+                  path: 'assets/dollarLogo.png',
+                  text: 'Price per Seat',
+                  type: TextInputType.number,
+                  height: 40,
+                  controller: priceController,
+                  width : 170,
+                  onPress: () {},
+                  validator: (String input) {
+                    if (input.isEmpty) {
+                      Get.snackbar('Warning', "Price is required.",
+                          colorText: Colors.white,
+                          backgroundColor: AppColors.greenColor);
+                      return '';
+                    }
+                  })
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildConfirmButton() {
+    return Positioned(
+      top: 730, //170
+      left: 20, //20
+      right: 20,
+      child: Obx(() => rideController.isRideUploading.value
+          ? Center(
+        child: CircularProgressIndicator(),
+      )
+          : greenButton('Create Ride', () {
+
+
+        if(!formKey.currentState!.validate()){
+          return;
+        }
+
+        Get.defaultDialog(
+          title: "Are you sure to create this ride ?",
+          content: Container(),
+          //barrierDismissible: false,
+          actions: [
+            MaterialButton(
+              onPressed: () {
+
+                Get.back();
+                Map<String, dynamic> rideData = {
+
+                  'pickup_address': sourceController.text,
+                  'destination_address': destinationController.text,
+                  'date': '${date!.day}-${date!.month}-${date!.year}',
+                  'start_time': startTimeController.text,
+                  'max_seats': maxSeats,
+                  'price_per_seat': priceController.text,
+                  'driver': FirebaseAuth.instance.currentUser!.uid,
+                  'pending' : [] ,
+                  'accepted' : [] ,
+                  'joined': [],
+                  'rejected' : [],
+                  'status': "Upcoming",
+                  'payment_method': '',
+                  'pickup_latlng': GeoPoint(source!.latitude, source.longitude),
+                  'destination_latlng': GeoPoint(destination!.latitude, destination.longitude),
+
+                };
+
+                 rideController.isRideUploading(true);
+                 rideController.createRide(rideData)
+                     .then((value) {
+                       print("Ride is done");
+                       resetControllers();
+                       showSourceField = false;
+                       showDateTimeFields = false;
+                       _polyline.clear();
+                       markers.clear();
+                     });
+
+              },
+
+              child: textWidget(
+                text: 'Confirm',
+                color: Colors.white,),
+              color: AppColors.greenColor,
+              shape: StadiumBorder(),
+            ),
+            SizedBox(
+              width:7
+            ),
+            MaterialButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: textWidget(
+                text: 'Cancel',
+                color: Colors.white,),
+              color: Colors.red,
+              shape: StadiumBorder(),
+            ),
+
+          ],
+        );
+        //Dialog();
+      },
+
+        // AwesomeDialog(
+        //   context: context,
+        //   dialogType: DialogType.warning,
+        //   animType: AnimType.topSlide,
+        //   showCloseIcon: true,
+        //   title: "Success",
+        //   desc: "Your ride has been created successfully",
+        //   btnOkOnPress: (){},
+        // );
+
+      )),
     );
   }
 
@@ -409,10 +730,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Drawer(
       child: Column(
         children: [
-          Obx(() => authController.myUser.value.name == null ? Center(child: CircularProgressIndicator()) :
+          Obx(() => authController.myDriver.value.name == null ? Center(child: CircularProgressIndicator()) :
           InkWell(
             onTap: () {
-              Get.to(() => const MyProfile());
+              Get.to(() => const DriverProfile());
             },
             child: SizedBox(
               height: 150,
@@ -426,13 +747,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 80,
                         decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            image: authController.myUser.value.image == null
+                            image: authController.myDriver.value.image == null
                                 ? const DecorationImage(
                                 image: AssetImage('assets/person.png'),
                                 fit: BoxFit.fill)
                                 : DecorationImage(
                                 image: NetworkImage(
-                                    authController.myUser.value.image!),
+                                    authController.myDriver.value.image!),
                                 fit: BoxFit.fill)),
                       ),
                       const SizedBox(
@@ -448,9 +769,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: Colors.black.withOpacity(0.28),
                                     fontSize: 14)),
                             Text(
-                              authController.myUser.value.name == null
+                              authController.myDriver.value.name == null
                                   ? "User"
-                                  : authController.myUser.value.name!,
+                                  : authController.myDriver.value.name!,
                               style: GoogleFonts.poppins(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -475,7 +796,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(()=> PaymentScreen())),
                 // buildDrawerItem(title: 'Ride History', onPressed: () {}, isVisible: true),
-                // buildDrawerItem(title: 'Invite Friends', onPressed: () {}),
+                //buildDrawerItem(title: 'Invite Friends', onPressed: () {}),
                 buildDrawerItem(title: 'My Rides', onPressed: () => Get.to(()=> const MyRides())),
                 buildDrawerItem(title: 'Promo Codes', onPressed: () {}),
                 buildDrawerItem(title: 'Settings', onPressed: () {}),
@@ -622,7 +943,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
-              setState(() {});
+              if(mounted) setState(() {});
               buildRideConfirmationSheet();
 
 
@@ -687,7 +1008,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
-              setState(() {});
+              if(mounted) setState(() {});
               buildRideConfirmationSheet();
 
 
@@ -750,8 +1071,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
-              setState(() {});
-              buildRideConfirmationSheet();
+              if(mounted) setState(() {});
+              //buildRideConfirmationSheet();
 
             },
             child: Container(
@@ -949,7 +1270,7 @@ class _HomeScreenState extends State<HomeScreen> {
             underline: Container(),
             onChanged: (String? value) {
               // This is called when the user selects an item.
-              setState(() {
+              if(mounted) setState(() {
                 dropdownValue = value!;
               });
             },
@@ -962,6 +1283,92 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
+    );
+  }
+
+  void resetControllers() {
+
+    destinationController.clear();
+    sourceController.clear();
+    date = DateTime.now();
+    dateController.text = '${date!.day}-${date!.month}-${date!.year}';
+    timeController.clear();
+    priceController.clear();
+    maxSeatsController.clear();
+    startTimeController.clear();
+    if(mounted) setState(() {});
+
+  }
+
+  _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      initialDatePickerMode: DatePickerMode.day,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null) {
+      date = DateTime(picked.year, picked.month, picked.day, date!.hour,
+          date!.minute, date!.second);
+      dateController.text = '${date!.day}-${date!.month}-${date!.year}';
+    }
+    if(mounted) setState(() {
+    });
+  }
+
+  startTimeMethod(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      startTime = picked;
+      startTimeController.text =
+      '${startTime.hourOfPeriod > 9 ? "" : '0'}${startTime.hour > 12 ? '${startTime.hour - 12}' : startTime.hour}:${startTime.minute > 9 ? startTime.minute : '0${startTime.minute}'} ${startTime.hour > 12 ? 'PM' : 'AM'}';
+    }
+    print("start ${startTimeController.text}");
+    if(mounted) setState(() {});
+  }
+
+  Dialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+            shape: RoundedRectangleBorder( borderRadius: BorderRadius.all(Radius.circular(10)) ),
+            title: Text('Are you sure to create this ride ?'),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+
+                MaterialButton(
+                  onPressed: () {},
+                  child: textWidget(
+                    text: 'Confirm',
+                    color: Colors.white,),
+                  color: AppColors.greenColor,
+                  shape: StadiumBorder(),
+                ),
+                // SizedBox(
+                //   width: 5,
+                // ),
+
+                MaterialButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  child: textWidget(
+                    text: 'Cancel',
+                    color: Colors.white,),
+                  color: Colors.red,
+                  shape: StadiumBorder(),
+                ),
+              ],
+            ),
+        );
+      },
     );
   }
 

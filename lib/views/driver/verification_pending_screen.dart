@@ -1,5 +1,8 @@
+import 'package:divide_ride/views/driver/driver_home.dart';
+import 'package:divide_ride/widgets/green_button.dart';
 import 'package:flutter/material.dart';
 import 'package:divide_ride/utils/app_colors.dart';
+import 'package:get/get.dart';
 
 import '../../../widgets/green_intro_widget.dart';
 
@@ -34,6 +37,13 @@ class _VerificaitonPendingScreenState extends State<VerificaitonPendingScreen> {
 
 
               Text('Your document is still pending for verification. Once it’s all verified you start getting rides. please sit tight',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400,color: Color(0xff7D7D7D)),textAlign: TextAlign.center,),
+
+
+              const SizedBox(height: 30,),
+
+              greenCustomButton('Get started', () { Get.to(()=> DriverHomeScreen());   } ),
+
+
 
             ],
           )),

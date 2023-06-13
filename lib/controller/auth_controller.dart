@@ -1,7 +1,11 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:divide_ride/models/driver_model/driver_model.dart';
 import 'package:divide_ride/models/user_model/user_model.dart';
+import 'package:divide_ride/shared%20preferences/shared_pref.dart';
+import 'package:divide_ride/utils/app_constants.dart';
+import 'package:divide_ride/views/driver/driver_home.dart';
 import 'package:divide_ride/views/home.dart';
 import 'package:divide_ride/views/profile_settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,7 +32,11 @@ class AuthController extends GetxController {
 
   var isProfileUploading = false.obs;
 
-  bool isLoginAsDriver = false;
+  //bool isLoginAsDriver = true;
+
+  var myUser= UserModel().obs;   /// all information of user is stored in myUser
+  var myDriver= DriverModel().obs;  /// all information of driver is stored in myDriver
+
 
   storeUserCard(String number, String expiry, String cvv, String name) async {
     await FirebaseFirestore.instance
@@ -123,49 +131,49 @@ class AuthController extends GetxController {
   }
 
   // var isDecided = false;
+  var isDecided = false;
 
   decideRoute() {
     // if (isDecided) {
     //   return;
     // }
-    // isDecided = true;
+    isDecided = true;
     print("called");
 
     ///step 1- Check user login?
     User? user = FirebaseAuth.instance.currentUser;
 
-    if (user != null) { ///if condition is ture this means user isa already login
+    if (user != null) {
       /// step 2- Check whether user profile exists?
       ///isLoginAsDriver == true means navigate it to the driver module
       FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get()
-          .then((value) {
+          .then((value) async{
 
-        if(isLoginAsDriver){
+               ///isLoginAsDriver == true means navigate it to driver module
+              bool isLoginAsDriver = await CacheHelper.getData(key: AppConstants.decisionKey) ?? false ;
 
-          if (value.exists) {
-            print("Driver HOme Screen");
-          } else {
-            Get.offAll(() => DriverProfileSetup());
-          }
-
-
-        }else{
-          if (value.exists) {
-            Get.offAll(() => HomeScreen());
-          } else {
-            Get.offAll(() => ProfileSettingScreen());
-          }
-        }
-
+              if (isLoginAsDriver) {
+                if (value.exists) {
+                  print("Driver HOme Screen");
+                  Get.offAll(() => DriverHomeScreen());
+                } else {
+                  Get.offAll(() => DriverProfileSetup());
+                }
+              } else {
+                if (value.exists) {
+                  Get.offAll(() => HomeScreen());
+                } else {
+                  Get.offAll(() => ProfileSettingScreen());
+                }
+              }
 
       }).catchError((e) {
         print("Error while decideRoute is $e");
       });
     }
-
   }
 
 
@@ -222,7 +230,7 @@ class AuthController extends GetxController {
     });
   }
 
-  var myUser= UserModel().obs;  /// all information of user is stored in myUser
+
 
   //this function shows user information on their profile, snapshots to capture any changes on real time
   //it calls UserModel instance to assert the value of the current user to this instance
@@ -296,6 +304,28 @@ class AuthController extends GetxController {
     });
   }
 
+  storeDriverInfo(
+      File? selectedImage,
+      String name,
+      String email, {
+        String url = '',
+
+      }) async {
+    String url_new = url;
+    if (selectedImage != null) {
+      url_new = await uploadImage(selectedImage);
+    }
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'image': url_new,
+      'name': name,
+      'email': email,
+    },SetOptions(merge: true)).then((value) {
+      isProfileUploading(false);
+
+      Get.off(()=> DriverHomeScreen());
+    });
+  }
 
 
   Future<bool> uploadCarEntry(Map<String,dynamic> carData)async{
@@ -308,6 +338,22 @@ class AuthController extends GetxController {
 
     return isUploaded;
   }
+
+
+  //this function shows user information on their profile, snapshots to capture any changes on real time
+  //it calls UserModel instance to assert the value of the current user to this instance
+  getDriverInfo() {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .listen((event) {
+      myDriver.value = DriverModel.fromJson(event.data()!);
+    });
+  }
+
+
 
 }
 

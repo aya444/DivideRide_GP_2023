@@ -24,6 +24,7 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
   bool useBackgroundImage = false;
   OutlineInputBorder? border;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  AuthController authController = Get.find<AuthController>();
 
 
 
@@ -155,9 +156,9 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                               print('valid!');
 
 
-                              await Get.find<AuthController>().storeUserCard(cardNumber, expiryDate, cvvCode, cardHolderName);
+                              await authController.storeUserCard(cardNumber, expiryDate, cvvCode, cardHolderName);
 
-                              Get.to(() => PaymentScreen());
+                              //Get.to(() => PaymentScreen());
 
                               Get.snackbar('Success', 'Your card is stored successfully');
 

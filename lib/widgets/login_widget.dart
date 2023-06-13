@@ -1,11 +1,9 @@
 import 'package:divide_ride/utils/app_constants.dart';
-import 'package:divide_ride/views/otp_verification_screen.dart';
 import 'package:divide_ride/widgets/text_widget.dart';
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sms_autofill/sms_autofill.dart';
+
 
 Widget loginWidget(CountryCode countryCode, Function onCountryChange,Function onSubmit) {
   return Padding(
@@ -29,9 +27,8 @@ Widget loginWidget(CountryCode countryCode, Function onCountryChange,Function on
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(0.05),
-                     spreadRadius: 3,
-                     blurRadius: 3
-                     )
+                    spreadRadius: 3,
+                    blurRadius: 3)
               ],
               borderRadius: BorderRadius.circular(8)),
           child: Row(
@@ -47,14 +44,13 @@ Widget loginWidget(CountryCode countryCode, Function onCountryChange,Function on
 
                           Expanded(
                             child: Container(
-                              child: countryCode.flagImage,
+                              child: countryCode.flagImage(),
                             ),
                           ),
 
-                          const SizedBox(width: 1,),
                           textWidget(text: countryCode.dialCode),
 
-                          //const SizedBox(width: 10,),
+                          // const SizedBox(width: 10,),
 
                           Icon(Icons.keyboard_arrow_down_rounded)
                         ],
@@ -71,17 +67,12 @@ Widget loginWidget(CountryCode countryCode, Function onCountryChange,Function on
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 10),
                   child: TextField(
-                    onSubmitted: (String? input) async{
-                      final signature = await SmsAutoFill().getAppSignature;
-                      onSubmit(input);
-                    },
-                    keyboardType: TextInputType.number,
+                    onSubmitted: (String? input)=> onSubmit(input),
                     decoration: InputDecoration(
                         hintStyle: GoogleFonts.poppins(
                             fontSize: 12, fontWeight: FontWeight.normal),
-                            hintText: AppConstants.enterMobileNumber,
-                            border: InputBorder.none
-                    ),
+                        hintText: AppConstants.enterMobileNumber,
+                        border: InputBorder.none),
                   ),
                 ),
               ),

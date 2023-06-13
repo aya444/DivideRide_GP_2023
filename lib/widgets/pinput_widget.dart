@@ -87,16 +87,16 @@ import 'package:get/get.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 
 class RoundedWithShadow extends StatefulWidget {
-   const RoundedWithShadow({Key? key}) : super(key: key);
+  const RoundedWithShadow({Key? key}) : super(key: key);
 
-   @override
-   _RoundedWithShadowState createState() => _RoundedWithShadowState();
+  @override
+  _RoundedWithShadowState createState() => _RoundedWithShadowState();
 
-   @override
-   String toStringShort() => 'Rounded With Shadow';
- }
+  @override
+  String toStringShort() => 'Rounded With Shadow';
+}
 
- class _RoundedWithShadowState extends State<RoundedWithShadow> {
+class _RoundedWithShadowState extends State<RoundedWithShadow> {
 
   AuthController authController = Get.find<AuthController>();
 
@@ -119,38 +119,38 @@ class RoundedWithShadow extends StatefulWidget {
   String codeValue = "";
 
   Widget build(BuildContext context) {
-     return Scaffold(
-         body: Center(
-           child: Container(
-           child: Padding(
-             padding: const EdgeInsets.symmetric(horizontal: 30),
-             child: PinFieldAutoFill(
-               decoration: UnderlineDecoration(
-                 textStyle: TextStyle(fontSize: 20, color: Colors.black),
-                 colorBuilder: FixedColorBuilder(AppColors.greenColor),
-               ),
-               currentCode: codeValue,
-               codeLength: 6,
-               onCodeChanged: (code) {
-                 print("onCodeChanged $code");
-                 if (code!.length == 6) {
-                   FocusScope.of(context).requestFocus(FocusNode());
-                 }
-                 setState(() {
-                   codeValue = code.toString();
-                 });
-               },
-               onCodeSubmitted: (pin) {
-                 print("onCodeSubmitted $pin");
-                 authController.verifyOtp(pin);
-               },
+    return Scaffold(
+        body: Center(
+          child: Container(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: PinFieldAutoFill(
+                decoration: UnderlineDecoration(
+                  textStyle: TextStyle(fontSize: 20, color: Colors.black),
+                  colorBuilder: FixedColorBuilder(AppColors.greenColor),
+                ),
+                currentCode: codeValue,
+                codeLength: 6,
+                onCodeChanged: (code) {
+                  print("onCodeChanged $code");
+                  if (code!.length == 6) {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                  }
+                  setState(() {
+                    codeValue = code.toString();
+                  });
+                },
+                onCodeSubmitted: (pin) {
+                  print("onCodeSubmitted $pin");
+                  authController.verifyOtp(pin);
+                },
 
-             ),
-           ),
+              ),
+            ),
 
 
-     ),
-         )
-     );
+          ),
+        )
+    );
   }
- }
+}

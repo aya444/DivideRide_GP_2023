@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:divide_ride/controller/auth_controller.dart';
 import 'package:divide_ride/utils/app_colors.dart';
+import 'package:divide_ride/widgets/green_button.dart';
 import 'package:divide_ride/widgets/green_intro_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -288,18 +289,5 @@ class _MyProfileState extends State<MyProfile> {
     );
   }
 
-  Widget greenButton(String title, Function onPressed) {
-    return MaterialButton(
-      minWidth: Get.width,
-      height: 50,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-      color: AppColors.greenColor,
-      onPressed: () => onPressed(),
-      child: Text(
-        title,
-        style: GoogleFonts.poppins(
-            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-      ),
-    );
-  }
+
 }

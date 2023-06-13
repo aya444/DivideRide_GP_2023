@@ -66,6 +66,7 @@ class PaymentScreenState extends State<PaymentScreen> {
               child: Obx(()=> ListView.builder(
 
                 shrinkWrap: true,
+                //physics: NeverScrollableScrollPhysics(),
                 itemBuilder: (ctx,i) {
 
                   String cardNumber = '';

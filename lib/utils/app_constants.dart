@@ -12,5 +12,6 @@ class AppConstants{
   static const String enterOtp = 'Enter your OTP code below';
   static const String resendCode = 'Resend code in';
   static const String seconds = 'seconds';
+  static const String decisionKey = "isLoginAsDriver";
 
 }

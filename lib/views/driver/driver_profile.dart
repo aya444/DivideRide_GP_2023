@@ -10,14 +10,14 @@ import 'package:divide_ride/widgets/green_intro_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as Path;
 
-class DriverProfileSetup extends StatefulWidget {
-  const DriverProfileSetup({Key? key}) : super(key: key);
+class DriverProfile extends StatefulWidget {
+  const DriverProfile({Key? key}) : super(key: key);
 
   @override
-  State<DriverProfileSetup> createState() => _DriverProfileSetupState();
+  State<DriverProfile> createState() => _DriverProfileState();
 }
 
-class _DriverProfileSetupState extends State<DriverProfileSetup> {
+class _DriverProfileState extends State<DriverProfile> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -34,6 +34,14 @@ class _DriverProfileSetupState extends State<DriverProfileSetup> {
     }
   }
 
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    nameController.text = authController.myDriver.value.name??"";
+    emailController.text = authController.myDriver.value.email??"";
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +54,7 @@ class _DriverProfileSetupState extends State<DriverProfileSetup> {
               height: Get.height * 0.4,
               child: Stack(
                 children: [
-                  greenIntroWidgetWithoutLogos(title: 'Let’s Get Started!',subtitle: 'Complete the profile Details'),
+                  greenIntroWidgetWithoutLogos(title: 'My Profile'),
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: InkWell(
@@ -54,21 +62,29 @@ class _DriverProfileSetupState extends State<DriverProfileSetup> {
                         getImage(ImageSource.camera);
                       },
                       child: selectedImage == null
-                          ? Container(
+                          ? authController.myDriver.value.image!=null? Container(
                         width: 120,
                         height: 120,
                         margin: EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.1),spreadRadius: 1,blurRadius: 2)
-                            ],
+                            image: DecorationImage(
+                                image: NetworkImage(authController.myDriver.value.image!),
+                                fit: BoxFit.fill),
                             shape: BoxShape.circle,
-                            color:Colors.white),
+                            color: Color(0xffD6D6D6)),
+
+                      ): Container(
+                        width: 120,
+                        height: 120,
+                        margin: EdgeInsets.only(bottom: 20),
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xffD6D6D6)),
                         child: Center(
                           child: Icon(
                             Icons.camera_alt_outlined,
                             size: 40,
-                            color: Colors.black,
+                            color: Colors.white,
                           ),
                         ),
                       )
@@ -81,7 +97,7 @@ class _DriverProfileSetupState extends State<DriverProfileSetup> {
                                 image: FileImage(selectedImage!),
                                 fit: BoxFit.fill),
                             shape: BoxShape.circle,
-                            color: Colors.white),
+                            color: Color(0xffD6D6D6)),
                       ),
                     ),
                   ),
@@ -141,22 +157,20 @@ class _DriverProfileSetupState extends State<DriverProfileSetup> {
                         ? Center(
                       child: CircularProgressIndicator(),
                     )
-                        : greenButton('Submit', () {
+                        : greenButton('Update', () {
 
 
                       if(!formKey.currentState!.validate()){
                         return;
                       }
 
-                      if (selectedImage == null) {
-                        Get.snackbar('Warning', 'Please add your image');
-                        return;
-                      }
+
                       authController.isProfileUploading(true);
-                      authController.storeDriverProfile(
-                        selectedImage!,
+                      authController.storeDriverInfo(
+                        selectedImage,
                         nameController.text,
                         emailController.text,
+                        url: authController.myDriver.value.image??"",
 
 
                       );
