@@ -1,25 +1,9 @@
-import 'dart:io';
-import 'dart:typed_data';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:divide_ride/models/driver_model/driver_model.dart';
-import 'package:divide_ride/models/user_model/user_model.dart';
-import 'package:divide_ride/shared%20preferences/shared_pref.dart';
 import 'package:divide_ride/utils/app_colors.dart';
-import 'package:divide_ride/utils/app_constants.dart';
-import 'package:divide_ride/views/driver/driver_home.dart';
-import 'package:divide_ride/views/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:geocoding/geocoding.dart' as geoCoding;
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_webservice/places.dart';
-import 'package:path/path.dart' as Path;
-
-
-
 
 class RideController extends GetxController {
 
@@ -47,6 +31,7 @@ class RideController extends GetxController {
 
   var allUsers = <DocumentSnapshot>[].obs;
   var allRides = <DocumentSnapshot>[].obs;
+  var filteredAndArrangedRides = <DocumentSnapshot>[].obs;
 
   var ridesICreated = <DocumentSnapshot>[].obs;
   var ridesIJoined = <DocumentSnapshot>[].obs;
@@ -108,7 +93,56 @@ class RideController extends GetxController {
 
   }
 
-  // getRidesIJoined(){
+  void findAndArrangeRides(Map<String, dynamic> searchRideInfo) {
+    String destinationAddress = searchRideInfo['destination_address'];
+    String date = searchRideInfo['date'];
+
+    // filter rides based on destination and date
+    List<DocumentSnapshot> filteredRides = allRides.where((ride) {
+      String rideDestination = ride.get('destination_address');
+      String rideDate = ride.get('date');
+      return rideDestination == destinationAddress && rideDate == date;
+    }).toList();
+
+    // Sort the filtered rides based on proximity to the source location
+    filteredRides.sort((a, b) {
+      double distanceA = calculateDistance(a.get('pickup_latlng'), searchRideInfo['pickup_latlng']);
+      double distanceB = calculateDistance(b.get('pickup_latlng'), searchRideInfo['pickup_latlng']);
+      return distanceA.compareTo(distanceB);
+    });
+
+    filteredAndArrangedRides.assignAll(filteredRides);
+  }
+
+  double calculateDistance(GeoPoint location, GeoPoint sourceLatLng) {
+    const int earthRadius = 6371; // Radius of the Earth in kilometers
+
+    double lat1 = location.latitude;
+    double lon1 = location.longitude;
+
+    double lat2 = sourceLatLng.latitude;
+    double lon2 = sourceLatLng.longitude;
+
+    // Calculate the differences between the latitudes and longitudes
+    double dLat = _toRadians(lat2 - lat1);
+    double dLon = _toRadians(lon2 - lon1);
+
+    // Apply the Haversine formula
+    double a = pow(sin(dLat / 2), 2) +
+        cos(_toRadians(lat1)) * cos(_toRadians(lat2)) * pow(sin(dLon / 2), 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double distance = earthRadius * c;
+
+    return distance; // Return the calculated distance
+  }
+
+  double _toRadians(double degree) {
+    return degree * pi / 180; // Convert degree to radians
+  }
+
+
+
+// getRidesIJoined(){
   //
   //   isRidesLoading(true);
   //   ridesIJoined.value =  allRides.where((e){
@@ -119,13 +153,6 @@ class RideController extends GetxController {
   //   }).toList();
   //
   // }
-
-
-
-
-
-
-
 
 }
 

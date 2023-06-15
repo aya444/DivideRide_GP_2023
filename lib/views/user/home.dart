@@ -1,15 +1,15 @@
 import 'dart:typed_data';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/controller/auth_controller.dart';
 import 'package:divide_ride/controller/polyline_handler.dart';
 import 'package:divide_ride/utils/app_colors.dart';
-import 'package:divide_ride/views/decision_screens/decision_screen.dart';
-import 'package:divide_ride/views/my_profile.dart';
+import 'package:divide_ride/views/user/my_profile.dart';
 import 'package:divide_ride/views/payment.dart';
-import 'package:divide_ride/widgets/text_widget.dart';
+import 'package:divide_ride/views/user/nearest_rides_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -17,9 +17,10 @@ import 'package:google_maps_webservice/places.dart';
 import 'package:geocoding/geocoding.dart' as geoCoding;
 import 'dart:ui' as ui;
 
-import 'my_rides.dart';
-
-
+import '../../controller/ride_controller.dart';
+import '../../widgets/green_button.dart';
+import '../../widgets/icon_title_widget.dart';
+import '../decision_screens/decision_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -30,8 +31,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? _mapStyle;
+  DateTime? date = DateTime.now();
 
   AuthController authController = Get.find<AuthController>();
+  RideController rideController = Get.find<RideController>();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   late LatLng destination;
   late LatLng source;
@@ -39,15 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // saving all the markers that will be showing on the map and store them in this set
   Set<Marker> markers = Set<Marker>();
-  List<String> list = <String>[
-    '**** **** **** 8789',
-    '**** **** **** 8921',
-    '**** **** **** 1233',
-    '**** **** **** 4352'
-  ];
-
-
-
 
   @override
   void initState() {
@@ -59,11 +54,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _mapStyle = string;
     });
 
-    loadCustomMarker();
+    dateController.text = '${date!.day}-${date!.month}-${date!.year}';
 
+    loadCustomMarker();
   }
 
-  String dropdownValue = '**** **** **** 8789';
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14.4746,
@@ -95,15 +90,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           buildProfileTitle(),
           buildTextField(),
-          showSourceField ? buildTextFieldForSource() : Container(),
           buildCurrentLocationIcon(),
-          buildNotificationIcon(),
+          showSourceField ? buildTextFieldForSource() : Container(),
+          showDateTimeFields ? buildSearchButton() : Container(),
+          showDateTimeFields ? buildDateField() : Container(),
           buildBottomSheet(),
         ],
       ),
     );
   }
 
+  // Widget for the welcome part
   Widget buildProfileTitle() {
     return Positioned(
       top: 0,
@@ -111,73 +108,77 @@ class _HomeScreenState extends State<HomeScreen> {
       right: 0,
       child: Obx(() => authController.myUser.value.name == null
           ? Center(
-        child: CircularProgressIndicator(),
-      )
-          : Container(
-        width: Get.width,
-        height: Get.width * 0.5,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        decoration: BoxDecoration(color: Colors.white70),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: authController.myUser.value.image == null
-                      ? DecorationImage(
-                      image: AssetImage('assets/person.png'),
-                      fit: BoxFit.fill)
-                      : DecorationImage(
-                      image: NetworkImage(
-                          authController.myUser.value.image!),
-                      fit: BoxFit.fill)),
-            ),
-            const SizedBox(
-              width: 15,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RichText(
-                  text: TextSpan(children: [
-                    TextSpan(
-                        text: 'Welcome back, ',
-                        style:
-                        TextStyle(color: Colors.black, fontSize: 14)),
-                    TextSpan(
-                        text: authController.myUser.value.name?.substring(0,authController.myUser.value.name?.indexOf(' ')),
-                        style: TextStyle(
-                            color: Colors.green,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold)),
-                  ]),
-                ),
-                Text(
-                  "Where are you going?",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                )
-              ],
+              child: CircularProgressIndicator(),
             )
-          ],
-        ),
-      )),
+          : Container(
+              width: Get.width,
+              height: Get.width * 0.5,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              decoration: BoxDecoration(color: Colors.white70),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: authController.myUser.value.image == null
+                            ? DecorationImage(
+                                image: AssetImage('assets/person.png'),
+                                fit: BoxFit.fill)
+                            : DecorationImage(
+                                image: NetworkImage(
+                                    authController.myUser.value.image!),
+                                fit: BoxFit.fill)),
+                  ),
+                  const SizedBox(
+                    width: 15,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      RichText(
+                        text: TextSpan(children: [
+                          TextSpan(
+                              text: 'Welcome back, ',
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 14)),
+                          TextSpan(
+                              text: authController.myUser.value.name?.substring(
+                                  0,
+                                  authController.myUser.value.name
+                                      ?.indexOf(' ')),
+                              style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold)),
+                        ]),
+                      ),
+                      Text(
+                        "Where are you going?",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            )),
     );
   }
 
-
-
   TextEditingController destinationController = TextEditingController();
   TextEditingController sourceController = TextEditingController();
+  TextEditingController dateController = TextEditingController();
   bool showSourceField = false;
+  bool showDateTimeFields = false;
 
+  // Widget for destination field
   Widget buildTextField() {
     return Positioned(
       top: 170,
@@ -201,15 +202,12 @@ class _HomeScreenState extends State<HomeScreen> {
           readOnly: true,
           onTap: () async {
             Prediction? p =
-            await authController.showGoogleAutoComplete(context);
+                await authController.showGoogleAutoComplete(context);
 
             String selectedPlace = p!.description!;
-
             destinationController.text = selectedPlace;
-
             List<geoCoding.Location> locations =
-            await geoCoding.locationFromAddress(selectedPlace);
-
+                await geoCoding.locationFromAddress(selectedPlace);
             destination =
                 LatLng(locations.first.latitude, locations.first.longitude);
 
@@ -224,8 +222,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
             myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                 CameraPosition(target: destination, zoom: 14)
-              //17 is new zoom level
-            ));
+                //17 is new zoom level
+                ));
 
             setState(() {
               showSourceField = true;
@@ -254,7 +252,83 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Widget buildTextFieldForSource() {
+  //   return Positioned(
+  //     top: 230, //170
+  //     left: 20, //20
+  //     right: 20, //20
+  //     child: Container(
+  //       width: Get.width,
+  //       height: 50,
+  //       padding: EdgeInsets.only(left: 15),
+  //       decoration: BoxDecoration(
+  //           color: Colors.white,
+  //           boxShadow: [
+  //             BoxShadow(
+  //                 color: Colors.black.withOpacity(0.05),
+  //                 spreadRadius: 4,
+  //                 blurRadius: 10)
+  //           ],
+  //           borderRadius: BorderRadius.circular(8)),
+  //       child: TextFormField(
+  //         controller: sourceController,
+  //         readOnly: true,
+  //         onTap: () async {
+  //           //buildSourceSheet();
+  //           Get.back();
+  //           Prediction? p =
+  //               await authController.showGoogleAutoComplete(context);
+  //
+  //           String place = p!.description!;
+  //
+  //           sourceController.text = place;
+  //
+  //           source = await authController.buildLatLngFromAddress(place);
+  //
+  //           if (markers.length >= 2) {
+  //             markers.remove(markers.last);
+  //           }
+  //           markers.add(Marker(
+  //               markerId: MarkerId(place),
+  //               infoWindow: InfoWindow(
+  //                 title: 'Source: $place',
+  //               ),
+  //               position: source));
+  //
+  //           await getPolylines(source, destination);
+  //
+  //           drawPolyline(place);
+  //
+  //           myMapController!.animateCamera(CameraUpdate.newCameraPosition(
+  //               CameraPosition(target: source, zoom: 14)));
+  //           if (mounted)
+  //             setState(() {
+  //               showDateTimeFields = true;
+  //             });
+  //         },
+  //         style: GoogleFonts.poppins(
+  //           fontSize: 16,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.black, // 0xffA7A7A7
+  //         ),
+  //         decoration: InputDecoration(
+  //           hintText: 'From: ',
+  //           hintStyle: GoogleFonts.poppins(
+  //               fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black),
+  //           suffixIcon: Padding(
+  //             padding: const EdgeInsets.only(left: 10),
+  //             child: Icon(
+  //               Icons.search,
+  //             ),
+  //           ),
+  //           border: InputBorder.none,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
+  // Widget for Source field
   Widget buildTextFieldForSource() {
     return Positioned(
       top: 230, //170
@@ -277,9 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
           controller: sourceController,
           readOnly: true,
           onTap: () async {
-
             buildSourceSheet();
-
           },
           style: GoogleFonts.poppins(
             fontSize: 16,
@@ -303,6 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Widget for Current location Icon
   Widget buildCurrentLocationIcon() {
     return Align(
       alignment: Alignment.bottomRight,
@@ -317,20 +390,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildNotificationIcon() {
-    return Align(
-      alignment: Alignment.bottomLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 30, left: 15),
-        child: CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.white,
-          child: Icon(Icons.notifications),
-        ),
-      ),
-    );
-  }
-
+  // Widget for bottom sheet that shows users' favourite locations
   Widget buildBottomSheet() {
     return Align(
       alignment: Alignment.bottomCenter,
@@ -363,15 +423,121 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //each option inside the side drawer
+  Widget buildDateField() {
+    return Positioned(
+      top: 290, //170
+      left: 20, //20
+      right: 20, //20
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          iconTitleContainer(
+            isReadOnly: true,
+            path: 'assets/date.png',
+            text: 'Date',
+            controller: dateController,
+            validator: (input) {
+              if (date == null) {
+                Get.snackbar('Warning', "Date is required.",
+                    colorText: Colors.white,
+                    backgroundColor: AppColors.greenColor);
+                return '';
+              }
+              return null;
+            },
+            onPress: () {
+              _selectDate(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      initialDatePickerMode: DatePickerMode.day,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null) {
+      date = DateTime(picked.year, picked.month, picked.day, date!.hour,
+          date!.minute, date!.second);
+      dateController.text = '${date!.day}-${date!.month}-${date!.year}';
+    }
+    if (mounted) setState(() {});
+  }
+
+  Widget buildSearchButton() {
+    return Positioned(
+      top: 350, //170
+      left: 20, //20
+      right: 20,
+      child: Obx(
+        () => rideController.isRideUploading.value
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : greenButton('Search for Rides', () {
+                // if (!formKey.currentState!.validate()) {
+                //  return;
+                //   }
+                print("I am before array!");
+                Map<String, dynamic> searchRideInfo = {
+                  'pickup_address': sourceController.text,
+                  'destination_address': destinationController.text,
+                  'date': '${date!.day}-${date!.month}-${date!.year}',
+                  'pickup_latlng': GeoPoint(source!.latitude, source.longitude),
+                  'destination_latlng':
+                      GeoPoint(destination!.latitude, destination.longitude),
+                };
+                print("I ama after array");
+                print('Search Ride Info: $searchRideInfo');
+
+                rideController.findAndArrangeRides(searchRideInfo);
+
+                print('Filtered and arranged rides:');
+                rideController.filteredAndArrangedRides.forEach((snapshot) {
+                  final data = snapshot.data() as Map<String, dynamic>?;
+
+                  if (data != null) {
+                    final pickupAddress = data['pickup_address'];
+                    final destinationAddress = data['destination_address'];
+
+                    if (pickupAddress != null && destinationAddress != null) {
+                      print('Ride ID: ${snapshot.id}');
+                      print('Pickup Address: $pickupAddress');
+                      print('Destination Address: $destinationAddress');
+                      // Add more fields as needed
+                    } else {
+                      print('Invalid ride data for Ride ID: ${snapshot.id}');
+                    }
+                  } else {
+                    print('No data available for Ride ID: ${snapshot.id}');
+                  }
+                });
+
+                resetControllers();
+                Get.to(() => SearchRideListPage(
+                      rideController: rideController,
+                    ));
+              }),
+      ),
+    );
+  }
+
+  // each option inside the side drawer
   buildDrawerItem(
       {required String title,
-        required Function onPressed,
-        Color color = Colors.black,
-        double fontSize = 20,
-        FontWeight fontWeight = FontWeight.w700,
-        double height = 45,
-        bool isVisible = false}) {
+      required Function onPressed,
+      Color color = Colors.black,
+      double fontSize = 20,
+      FontWeight fontWeight = FontWeight.w700,
+      double height = 45,
+      bool isVisible = false}) {
     return SizedBox(
       height: height,
       child: ListTile(
@@ -391,13 +557,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             isVisible
                 ? CircleAvatar(
-              backgroundColor: AppColors.greenColor,
-              radius: 15,
-              child: Text(
-                '1',
-                style: GoogleFonts.poppins(color: Colors.white),
-              ),
-            )
+                    backgroundColor: AppColors.greenColor,
+                    radius: 15,
+                    child: Text(
+                      '1',
+                      style: GoogleFonts.poppins(color: Colors.white),
+                    ),
+                  )
                 : Container()
           ],
         ),
@@ -405,11 +571,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Widget to create the side drawer
   buildDrawer() {
     return Drawer(
       child: Column(
         children: [
-          Obx(() => authController.myUser.value.name == null ? Center(child: CircularProgressIndicator()) :
           InkWell(
             onTap: () {
               Get.to(() => const MyProfile());
@@ -418,53 +584,52 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 150,
               child: DrawerHeader(
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: authController.myUser.value.image == null
-                                ? const DecorationImage(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: authController.myUser.value.image == null
+                            ? const DecorationImage(
                                 image: AssetImage('assets/person.png'),
                                 fit: BoxFit.fill)
-                                : DecorationImage(
+                            : DecorationImage(
                                 image: NetworkImage(
                                     authController.myUser.value.image!),
                                 fit: BoxFit.fill)),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Good Morning, ',
-                                style: GoogleFonts.poppins(
-                                    color: Colors.black.withOpacity(0.28),
-                                    fontSize: 14)),
-                            Text(
-                              authController.myUser.value.name == null
-                                  ? "User"
-                                  : authController.myUser.value.name!,
-                              style: GoogleFonts.poppins(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  )),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Good Morning, ',
+                            style: GoogleFonts.poppins(
+                                color: Colors.black.withOpacity(0.28),
+                                fontSize: 14)),
+                        Text(
+                          authController.myUser.value.name == null
+                              ? "User"
+                              : authController.myUser.value.name!,
+                          style: GoogleFonts.poppins(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              )),
             ),
-          ),
           ),
           const SizedBox(
             height: 20,
@@ -473,19 +638,21 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.symmetric(horizontal: 30),
             child: Column(
               children: [
-                buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(()=> PaymentScreen())),
-                // buildDrawerItem(title: 'Ride History', onPressed: () {}, isVisible: true),
-                // buildDrawerItem(title: 'Invite Friends', onPressed: () {}),
-                buildDrawerItem(title: 'My Rides', onPressed: () => Get.to(()=> const MyRides())),
-                buildDrawerItem(title: 'Promo Codes', onPressed: () {}),
-                buildDrawerItem(title: 'Settings', onPressed: () {}),
-                buildDrawerItem(title: 'Support', onPressed: () {}),
-                buildDrawerItem(title: 'Log Out', onPressed: () {
-
-                  FirebaseAuth.instance.signOut();
-                  Get.to(()=> DecisionScreen());
-
+                buildDrawerItem(
+                    title: 'Payment History',
+                    onPressed: () => Get.to(() => PaymentScreen())),
+                buildDrawerItem(
+                    title: 'Ride History', onPressed: () {}, isVisible: true),
+                buildDrawerItem(title: 'Settings', onPressed: () {
+                    Get.to(() => const MyProfile());
                 }),
+                buildDrawerItem(title: 'Support', onPressed: () {}),
+                buildDrawerItem(
+                    title: 'Log Out',
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+                      Get.to(() => DecisionScreen());
+                    }),
               ],
             ),
           ),
@@ -505,20 +672,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                buildDrawerItem(
-                    title: 'Get food delivery',
-                    onPressed: () {},
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black.withOpacity(0.15),
-                    height: 20),
-                buildDrawerItem(
-                    title: 'Make money driving',
-                    onPressed: () {},
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black.withOpacity(0.15),
-                    height: 20),
+                // buildDrawerItem(
+                //     title: 'Get food delivery',
+                //     onPressed: () {},
+                //     fontSize: 12,
+                //     fontWeight: FontWeight.w500,
+                //     color: Colors.black.withOpacity(0.15),
+                //     height: 20),
+                // buildDrawerItem(
+                //     title: 'Make money driving',
+                //     onPressed: () {},
+                //     fontSize: 12,
+                //     fontWeight: FontWeight.w500,
+                //     color: Colors.black.withOpacity(0.15),
+                //     height: 20),
                 buildDrawerItem(
                   title: 'Rate us on store',
                   onPressed: () {},
@@ -537,7 +704,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 
   late Uint8List markIcons;
 
@@ -562,16 +728,20 @@ class _HomeScreenState extends State<HomeScreen> {
     _polyline.add(Polyline(
       polylineId: PolylineId(placeId),
       visible: true, // this means this line should be visible to the user
-      points: [source,destination], // means from point a (source) to point b (destination) draw a polyline
+      points: [
+        source,
+        destination
+      ], // means from point a (source) to point b (destination) draw a polyline
       color: AppColors.greenColor, // color of polyline
       width: 5,
     ));
   }
 
+  // Function to fetch users' favourite locations in source sheet
   void buildSourceSheet() {
     Get.bottomSheet(Container(
       width: Get.width,
-      height: Get.height * 0.5,
+      height: Get.height * 0.7,
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
@@ -617,15 +787,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   position: source));
 
               await getPolylines(source, destination);
-
               drawPolyline(sourceController.text);
-
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
-              setState(() {});
-              buildRideConfirmationSheet();
-
-
+              if (mounted)
+                setState(() {
+                  showDateTimeFields = true;
+                });
+              // buildRideConfirmationSheet();
             },
             child: Container(
               width: Get.width,
@@ -687,10 +856,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
-              setState(() {});
-              buildRideConfirmationSheet();
-
-
+              if (mounted)
+                setState(() {
+                  showDateTimeFields = true;
+                });
+              // buildRideConfirmationSheet();
             },
             child: Container(
               width: Get.width,
@@ -726,12 +896,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () async {
               Get.back();
               Prediction? p =
-              await authController.showGoogleAutoComplete(context);
-
+                  await authController.showGoogleAutoComplete(context);
               String place = p!.description!;
-
               sourceController.text = place;
-
               source = await authController.buildLatLngFromAddress(place);
 
               if (markers.length >= 2) {
@@ -745,14 +912,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   position: source));
 
               await getPolylines(source, destination);
-
               drawPolyline(place);
-
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
-              setState(() {});
-              buildRideConfirmationSheet();
-
+              if (mounted)
+                setState(() {
+                  showDateTimeFields = true;
+                });
             },
             child: Container(
               width: Get.width,
@@ -787,185 +953,11 @@ class _HomeScreenState extends State<HomeScreen> {
     ));
   }
 
-  buildRideConfirmationSheet() {
-    Get.bottomSheet(Container(
-      width: Get.width,
-      height: Get.height * 0.4,
-      padding: EdgeInsets.only(left: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-            topRight: Radius.circular(12), topLeft: Radius.circular(12)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 10,
-          ),
-          Center(
-            child: Container(
-              width: Get.width * 0.2,
-              height: 8,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8), color: Colors.grey),
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          textWidget(
-              text: 'Select an option:',
-              fontSize: 18,
-              fontWeight: FontWeight.bold),
-          const SizedBox(
-            height: 20,
-          ),
-          buildDriversList(),
-          const SizedBox(
-            height: 20,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Divider(),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(child: buildPaymentCardWidget()),
-                MaterialButton(
-                  onPressed: () {},
-                  child: textWidget(
-                    text: 'Confirm',
-                    color: Colors.white,
-                  ),
-                  color: AppColors.greenColor,
-                  shape: StadiumBorder(),
-                )
-              ],
-            ),
-          )
-        ],
-      ),
-    ));
+  void resetControllers() {
+    destinationController.clear();
+    sourceController.clear();
+    date = DateTime.now();
+    dateController.text = '${date!.day}-${date!.month}-${date!.year}';
+    if (mounted) setState(() {});
   }
-
-  int selectedRide = 0;
-
-  buildDriversList() {
-    return Container(
-      height: 90,
-      width: Get.width,
-      child: StatefulBuilder(builder: (context, set) {
-        return ListView.builder(
-          itemBuilder: (ctx, i) {
-            return InkWell(
-              onTap: () {
-                set(() {
-                  selectedRide = i;
-                });
-              },
-              child: buildDriverCard(selectedRide == i),
-            );
-          },
-          itemCount: 3,
-          scrollDirection: Axis.horizontal,
-        );
-      }),
-    );
-  }
-
-  buildDriverCard(bool selected) {
-    return Container(
-      margin: EdgeInsets.only(right: 8, left: 8, top: 4, bottom: 4),
-      height: 85,
-      width: 165,
-      decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-                color: selected
-                    ? Color(0xff2DBB54).withOpacity(0.2)
-                    : Colors.grey.withOpacity(0.2),
-                offset: Offset(0, 5),
-                blurRadius: 5,
-                spreadRadius: 1)
-          ],
-          borderRadius: BorderRadius.circular(12),
-          color: selected ? Color(0xff2DBB54) : Colors.grey),
-      child: Stack(
-        children: [
-          Container(
-            padding: EdgeInsets.only(left: 10, top: 10, bottom: 10, right: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                textWidget(
-                    text: 'Standard',
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700),
-                textWidget(
-                    text: '\$9.90',
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500),
-                textWidget(
-                    text: '3 MIN',
-                    color: Colors.white.withOpacity(0.8),
-                    fontWeight: FontWeight.normal,
-                    fontSize: 12),
-              ],
-            ),
-          ),
-          Positioned(
-              right: -20,
-              top: 0,
-              bottom: 0,
-              child: Image.asset('assets/Mask Group 2.png'))
-        ],
-      ),
-    );
-  }
-
-
-  buildPaymentCardWidget() {
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/visa.png',
-            width: 40,
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          DropdownButton<String>(
-            value: dropdownValue,
-            icon: const Icon(Icons.keyboard_arrow_down),
-            elevation: 16,
-            style: const TextStyle(color: Colors.deepPurple),
-            underline: Container(),
-            onChanged: (String? value) {
-              // This is called when the user selects an item.
-              setState(() {
-                dropdownValue = value!;
-              });
-            },
-            items: list.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: textWidget(text: value),
-              );
-            }).toList(),
-          )
-        ],
-      ),
-    );
-  }
-
-
-
-
 }
