@@ -1,6 +1,5 @@
 import 'package:divide_ride/controller/auth_controller.dart';
 import 'package:divide_ride/shared%20preferences/shared_pref.dart';
-import 'package:divide_ride/views/driver/car_registration/car_registration_template.dart';
 import 'package:divide_ride/views/login_screen.dart';
 import 'package:divide_ride/widgets/my_button.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +20,7 @@ class _DecisionScreenState extends State<DecisionScreen> {
   AuthController authController = Get.find<AuthController>();
 
   void initState() {
-    // TODO: implement initState
     super.initState();
-
   }
 
   @override
@@ -41,10 +38,7 @@ class _DecisionScreenState extends State<DecisionScreen> {
               //authController.isLoginAsDriver = true;
               CacheHelper.saveData(key: AppConstants.decisionKey, val: true);
               Get.to(() => LoginScreen());
-
-
-            },
-                Get.width * 0.8),
+            }, Get.width * 0.8),
             const SizedBox(
               height: 20,
             ),
@@ -52,9 +46,7 @@ class _DecisionScreenState extends State<DecisionScreen> {
               //authController.isLoginAsDriver = false;
               CacheHelper.saveData(key: AppConstants.decisionKey, val: false);
               Get.to(() => LoginScreen());
-
-            },
-                Get.width * 0.8),
+            }, Get.width * 0.8),
           ],
         ),
       ),

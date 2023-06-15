@@ -6,8 +6,8 @@ import 'package:divide_ride/models/user_model/user_model.dart';
 import 'package:divide_ride/shared%20preferences/shared_pref.dart';
 import 'package:divide_ride/utils/app_constants.dart';
 import 'package:divide_ride/views/driver/driver_home.dart';
-import 'package:divide_ride/views/home.dart';
-import 'package:divide_ride/views/profile_settings.dart';
+import 'package:divide_ride/views/user/home.dart';
+import 'package:divide_ride/views/user/profile_settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -352,8 +352,5 @@ class AuthController extends GetxController {
       myDriver.value = DriverModel.fromJson(event.data()!);
     });
   }
-
-
-
 }
 

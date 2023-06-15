@@ -1,12 +1,6 @@
 import 'package:divide_ride/controller/ride_controller.dart';
 import 'package:divide_ride/shared%20preferences/shared_pref.dart';
 import 'package:divide_ride/views/decision_screens/decision_screen.dart';
-import 'package:divide_ride/views/home.dart';
-import 'package:divide_ride/views/login_screen.dart';
-import 'package:divide_ride/views/ride_details_view.dart';
-import 'package:divide_ride/views/rides_view.dart';
-import 'package:divide_ride/views/my_rides.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
