@@ -10,14 +10,14 @@ import 'package:get/get.dart';
 import '../models/driver_model/driver_model.dart';
 import '../views/ride_details_before_database.dart';
 
-class RidesCards extends StatefulWidget {
-  const RidesCards({Key? key}) : super(key: key);
+class HistoryRidesForUser extends StatefulWidget {
+  const HistoryRidesForUser({Key? key}) : super(key: key);
 
   @override
-  State<RidesCards> createState() => _RidesCardsState();
+  State<HistoryRidesForUser> createState() => _RidesCardsState();
 }
 
-class _RidesCardsState extends State<RidesCards> {
+class _RidesCardsState extends State<HistoryRidesForUser> {
 
 
   RideController rideController = Get.find<RideController>();
@@ -26,11 +26,9 @@ class _RidesCardsState extends State<RidesCards> {
   void initState() {
     super.initState();
 
-    print('length of ridesICreated = ${rideController.ridesICreated.length}');
     print('length of allRides = ${rideController.allRides.length}');
     print('length of allUsers = ${rideController.allUsers.length}');
     print("driver Id = ${FirebaseAuth.instance.currentUser!.uid} ");
-    //rideController.getRidesICreated();
 
   }
 
@@ -55,9 +53,7 @@ class _RidesCardsState extends State<RidesCards> {
   @override
   Widget build(BuildContext context) {
 
-    return Obx(() =>
-    rideController.isRidesLoading.value ? Center(
-      child: CircularProgressIndicator(),) : ListView.builder(
+    return Obx(() => ListView.builder(
 
       shrinkWrap: true,
       //physics: NeverScrollableScrollPhysics(),
@@ -90,20 +86,20 @@ class _RidesCardsState extends State<RidesCards> {
   // }
 
 
-final List<Driver> drivers = [
+  final List<Driver> drivers = [
     Driver(
-      name: "Habiba",
-      averageReview: 0,
-      totalReviews: 0,
-      profile: "assets/driver_2.png",
-      car: "Nissan Sunny"
+        name: "Habiba",
+        averageReview: 0,
+        totalReviews: 0,
+        profile: "assets/driver_2.png",
+        car: "Nissan Sunny"
     ),
     Driver(
-      name: "Aya",
-      averageReview: 0,
-      totalReviews: 0,
-      profile: "assets/driver_3.png",
-      car: "Toyota corolla"
+        name: "Aya",
+        averageReview: 0,
+        totalReviews: 0,
+        profile: "assets/driver_3.png",
+        car: "Toyota corolla"
     ),
     Driver(
       name: "George",

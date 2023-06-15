@@ -246,7 +246,7 @@ class AuthController extends GetxController {
   }
 
   Future<Prediction?> showGoogleAutoComplete(BuildContext context) async {
-    const kGoogleApiKey = "AIzaSyC8j9kfawLk8lGQZxOiWV-33h36nrxfs44";
+    const kGoogleApiKey = "AIzaSyCHWB38zEhd2ncTPPCPHFksdmT2FINaF0U";
 
     Prediction? p = await PlacesAutocomplete.show(
       //Prediction is nullable in case a non existed place is searched for

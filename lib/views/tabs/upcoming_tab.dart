@@ -1,4 +1,5 @@
 import 'package:divide_ride/views/rides_view.dart';
+import 'package:divide_ride/views/upcoming_rides_view.dart';
 import 'package:flutter/material.dart';
 
 class UpcomingTab extends StatelessWidget {
@@ -6,8 +7,8 @@ class UpcomingTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: RidesView(),
+    return Scaffold(
+      body: UpcomingRidesView(),
     );
   }
 }

@@ -13,7 +13,6 @@ class RideController extends GetxController {
     getMyDocument();
     getUsers();
     getRides();
-    getRidesICreated();
   }
 
 
@@ -29,12 +28,19 @@ class RideController extends GetxController {
   }
 
 
-  var allUsers = <DocumentSnapshot>[].obs;
-  var allRides = <DocumentSnapshot>[].obs;
-  var filteredAndArrangedRides = <DocumentSnapshot>[].obs;
 
-  var ridesICreated = <DocumentSnapshot>[].obs;
-  var ridesIJoined = <DocumentSnapshot>[].obs;
+  RxList allUsers = [].obs;
+  RxList allRides = [].obs;
+
+  RxList ridesICreated = [].obs;
+
+  RxList ridesICancelled = [].obs;
+
+  RxList ridesIJoined = [].obs;
+
+  RxList filteredAndArrangedRides = [].obs;
+
+
 
   var isRideUploading = false.obs;
 
@@ -83,22 +89,22 @@ class RideController extends GetxController {
   ///this method is getting all rides Created by Specific Driver from the database and store inside RidesICreated list
   getRidesICreated(){
 
-    isRidesLoading(true);
-    ridesICreated.value =  allRides.where((e){
+    ridesICreated.assignAll( allRides.where((e){
       String driverId = e.get('driver');
+      String status = e.get('status');
 
-      return driverId.contains(FirebaseAuth.instance.currentUser!.uid);
+      return driverId.contains(FirebaseAuth.instance.currentUser!.uid) && status=='Upcoming';
 
-    }).toList();
-
+    }).toList());
   }
+
 
   void findAndArrangeRides(Map<String, dynamic> searchRideInfo) {
     String destinationAddress = searchRideInfo['destination_address'];
     String date = searchRideInfo['date'];
 
     // filter rides based on destination and date
-    List<DocumentSnapshot> filteredRides = allRides.where((ride) {
+    List filteredRides = allRides.where((ride) {
       String rideDestination = ride.get('destination_address');
       String rideDate = ride.get('date');
       return rideDestination == destinationAddress && rideDate == date;
@@ -138,21 +144,34 @@ class RideController extends GetxController {
 
   double _toRadians(double degree) {
     return degree * pi / 180; // Convert degree to radians
+
   }
 
 
+  getRidesICancelled(){
 
-// getRidesIJoined(){
-  //
-  //   isRidesLoading(true);
-  //   ridesIJoined.value =  allRides.where((e){
-  //     String? driverId = e.get('driver');
-  //
-  //     return driverId!.contains(FirebaseAuth.instance.currentUser!.uid);
-  //
-  //   }).toList();
-  //
-  // }
+    ridesICancelled.assignAll( allRides.where((e){
+      String driverId = e.get('driver');
+      String status = e.get('status');
+
+      return driverId.contains(FirebaseAuth.instance.currentUser!.uid) && status=='Cancelled';
+
+    }).toList());
+  }
+
+
+  getRidesIJoined(){
+
+    ridesIJoined.assignAll( allRides.where((e){
+
+      List joinedIds = e.get('joined');
+
+      return joinedIds.contains(FirebaseAuth.instance.currentUser!.uid);
+
+    }).toList());
+
+  }
+
 
 }
 

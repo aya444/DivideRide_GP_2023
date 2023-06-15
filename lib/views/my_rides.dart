@@ -17,6 +17,7 @@ class MyRides extends StatelessWidget {
           title: Text('My Rides'),
           centerTitle: true,
           bottom: TabBar(
+              isScrollable: true,
               labelColor: AppColors.whiteColor,
               labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               unselectedLabelColor: Colors.grey[300],
@@ -33,7 +34,8 @@ class MyRides extends StatelessWidget {
         body: Column(
           children: [
             Expanded(
-              child: TabBarView(children: [
+              child: TabBarView(
+                  children: [
 
                 UpcomingTab(),
                 HistoryTab(),
