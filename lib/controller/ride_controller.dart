@@ -25,6 +25,9 @@ class RideController extends GetxController {
         .snapshots().listen((event) {
       myDocument = event;
     });
+    if (myDocument == null){
+      return;
+    }
   }
 
 
@@ -39,6 +42,7 @@ class RideController extends GetxController {
   RxList ridesIJoined = [].obs;
 
   RxList filteredAndArrangedRides = [].obs;
+  RxList pendingRequests = [].obs;
 
 
 
@@ -172,6 +176,24 @@ class RideController extends GetxController {
 
   }
 
+  /// Function to request to join a specific ride
+  requestToJoinRide(String rideId, String userId) async {
+    try {
+      // Get a reference to the ride document in Firestore to update to it
+      DocumentReference rideRef = FirebaseFirestore.instance.collection('rides').doc(rideId);
+
+      // Add the userId to the pending array in the ride document
+      await rideRef.update({
+        'pending': FieldValue.arrayUnion([userId]),
+      }).then((value) {
+        Get.snackbar('Success', 'Your request was sent successfully.',
+            colorText: Colors.white,backgroundColor: AppColors.greenColor);
+        isRideUploading(false);
+      });
+    } catch (e) {
+      print('Failed to send request to join ride: $e');
+    }
+  }
 
 }
 
