@@ -8,6 +8,7 @@ import 'package:divide_ride/controller/ride_controller.dart';
 import 'package:divide_ride/utils/app_colors.dart';
 import 'package:divide_ride/views/decision_screens/decision_screen.dart';
 import 'package:divide_ride/views/driver/driver_profile.dart';
+import 'package:divide_ride/views/ride_requests.dart';
 import 'package:divide_ride/views/user/my_profile.dart';
 import 'package:divide_ride/views/my_rides.dart';
 import 'package:divide_ride/views/payment.dart';
@@ -797,6 +798,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                 buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(()=> PaymentScreen())),
                 // buildDrawerItem(title: 'Ride History', onPressed: () {}, isVisible: true),
                 //buildDrawerItem(title: 'Invite Friends', onPressed: () {}),
+                buildDrawerItem(title: 'Ride Requests', onPressed: () => Get.to(()=> const RideRequests())),
                 buildDrawerItem(title: 'My Rides', onPressed: () => Get.to(()=> const MyRides())),
                 buildDrawerItem(title: 'Promo Codes', onPressed: () {}),
                 buildDrawerItem(title: 'Settings', onPressed: () {}),

@@ -521,7 +521,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
 
                 resetControllers();
-                Get.to(() => SearchRideListPage(
+                Get.to(() => NearestRidePage(
                       rideController: rideController,
                     ));
               }),

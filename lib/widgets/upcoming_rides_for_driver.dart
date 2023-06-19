@@ -34,6 +34,7 @@ class _UpcomingRidesForDriverState extends State<UpcomingRidesForDriver> {
     print("driver Id = ${FirebaseAuth.instance.currentUser!.uid} ");
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       rideController.getRidesICreated();
+      rideController.getMyDocument();
     });
 
   }
@@ -56,7 +57,7 @@ class _UpcomingRidesForDriverState extends State<UpcomingRidesForDriver> {
         return Padding(
             padding: EdgeInsets.symmetric(vertical: 13),
 
-            child: RideBox( ride: rideController.ridesICreated[index] , driver: driver , showCarDetails: false ));
+            child: RideBox( ride: rideController.ridesICreated[index] , driver: driver , showCarDetails: false , shouldNavigate: true,));
       }
       , itemCount: rideController.ridesICreated.length,)
     );

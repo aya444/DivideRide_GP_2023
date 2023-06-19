@@ -10,6 +10,7 @@ import '../widgets/ride_box.dart';
 import '../widgets/text_widget.dart';
 
 class RideDetailsBeforeDatabase extends StatefulWidget {
+
   DocumentSnapshot ride;
   DocumentSnapshot driver;
   RideDetailsBeforeDatabase(this.ride, this.driver);
@@ -27,15 +28,37 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
   @override
   void initState() {
     super.initState();
+
     isDriver = CacheHelper.getData(key: AppConstants.decisionKey) ?? false;
+
     print(isDriver.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     RideController rideController = Get.find<RideController>();
+
     String userId = FirebaseAuth.instance.currentUser!.uid;
-    String rideId = widget.ride.id;
+
+    //String rideId = widget.ride.id;
+
+
+    List pendingUsers = [];
+
+    try {
+      pendingUsers = widget.ride.get('pending');
+    } catch (e) {
+      pendingUsers = [];
+    }
+
+    List rejectedUsers = [];
+
+    try {
+      rejectedUsers = widget.ride.get('rejected');
+    } catch (e) {
+      rejectedUsers = [];
+    }
+
     List joinedUsers = [];
 
     try {
@@ -43,6 +66,9 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
     } catch (e) {
       joinedUsers = [];
     }
+
+
+
 
     return Scaffold(
       appBar: AppBar(
@@ -182,16 +208,16 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
                     child: InkWell(
                       onTap: () {
                         Get.defaultDialog(
-                          title: "Are you sure you want to join this ride?",
+                          title: "Are you sure to join this ride?",
                           content: Container(),
                           //barrierDismissible: false,
                           actions: [
                             MaterialButton(
                               onPressed: () {
-                                Get.back();
+                                 Get.back();
                                 rideController.isRideUploading(true);
                                 rideController.requestToJoinRide(
-                                    rideId, userId);
+                                    widget.ride, userId);
                               },
                               child: textWidget(
                                 text: 'Confirm',
@@ -219,16 +245,25 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
                         height: 50,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(13),
-                            color: AppColors.greenColor.withOpacity(0.9)),
+                            color: pendingUsers.contains(userId) ? AppColors.yellow.withOpacity(0.9) : AppColors.greenColor.withOpacity(0.9)
+                        ),
                         child: Center(
-                          child: Text(
-                            "Send Request",
-                            style: TextStyle(
+                          child: pendingUsers.contains(userId) ?
+                          Text(
+                              "Pending",
+                              style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            )
+                          ) : Text(
+                              "Send Request",
+                              style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
                               fontSize: 16,
                             ),
-                          ),
+                          )
                         ),
                       ),
                     ),

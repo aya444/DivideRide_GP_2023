@@ -14,8 +14,10 @@ class RideBox extends StatelessWidget {
   final DocumentSnapshot ride;
   final DocumentSnapshot driver;
   final bool showCarDetails;
-  
-  const RideBox({super.key, required this.ride , required this.driver , required this.showCarDetails});
+  final bool showOptions;
+  final bool shouldNavigate;
+
+  const RideBox({super.key, required this.ride , required this.driver , required this.showCarDetails , this.showOptions = false , this.shouldNavigate=false});
 
 
 
@@ -35,12 +37,18 @@ class RideBox extends StatelessWidget {
     return InkWell(
       onTap: () {
         if(showCarDetails == false){
-          Get.to(()=> RideDetailsBeforeDatabase(ride , driver));
+          if(showOptions == true || shouldNavigate == false){
+
+          }
+          else{
+            Get.to(()=> RideDetailsBeforeDatabase(ride , driver));
+          }
+
         }
       },
       child: Container(
         width: double.maxFinite,
-        height: showCarDetails? 260 : 215,
+        height: showCarDetails || showOptions ? 260 : 215,
         padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
         decoration: BoxDecoration(
 
@@ -241,6 +249,64 @@ class RideBox extends StatelessWidget {
 
             ),
 
+            if(showOptions)...[
+
+              const SizedBox(height: 10),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      //width: 200,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 8.0,
+                      ),
+                      decoration: BoxDecoration(
+                          color: AppColors.greenColor,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Center(
+                        child: Text(
+                          "Accept",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: Container(
+                      //width: 200,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 8.0,
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.red.shade700,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Center(
+                        child: Text(
+                          "Reject",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+
+            ],
+
             if(showCarDetails)...[
 
               const SizedBox(height: 10),
@@ -291,7 +357,9 @@ class RideBox extends StatelessWidget {
                   ),
             ),
                 ],
-              )]
+              )
+
+            ]
 
           ],
         ),

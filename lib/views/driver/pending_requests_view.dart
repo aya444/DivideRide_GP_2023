@@ -7,17 +7,16 @@ import 'package:divide_ride/widgets/ride_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../models/driver_model/driver_model.dart';
-import '../views/ride_details_before_database.dart';
 
-class HistoryRidesForDriver extends StatefulWidget {
-  const HistoryRidesForDriver({Key? key}) : super(key: key);
+
+class PendingRequestsView extends StatefulWidget {
+  const PendingRequestsView({Key? key}) : super(key: key);
 
   @override
-  State<HistoryRidesForDriver> createState() => _UpcomingRidesForDriverState();
+  State<PendingRequestsView> createState() => _PendingRequestsViewState();
 }
 
-class _UpcomingRidesForDriverState extends State<HistoryRidesForDriver> {
+class _PendingRequestsViewState extends State<PendingRequestsView> {
 
 
   RideController rideController = Get.find<RideController>();
@@ -28,15 +27,14 @@ class _UpcomingRidesForDriverState extends State<HistoryRidesForDriver> {
     super.initState();
 
 
-    print('length of ridesICancelled = ${rideController.ridesICancelled.length}');
+    print('length of ridesICreated = ${rideController.ridesICreated.length}');
     print('length of allRides = ${rideController.allRides.length}');
     print('length of allUsers = ${rideController.allUsers.length}');
+    print("length of pendingRequests = ${rideController.pendingRequests.length}");
     print("driver Id = ${FirebaseAuth.instance.currentUser!.uid} ");
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      rideController.getRidesICancelled();
+      rideController.getPendingRequests();
     });
-
 
   }
 
@@ -51,27 +49,19 @@ class _UpcomingRidesForDriverState extends State<HistoryRidesForDriver> {
       //physics: NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
 
-        //DocumentSnapshot driver = rideController.allUsers.firstWhere( (e) => rideController.allRides[index].get('driver') == e.id );
 
-        DocumentSnapshot driver = rideController.myDocument!;
+        DocumentSnapshot user = rideController.allUsers.firstWhere( (e) => rideController.pendingRequests[index].get('user_id') == e.id );
+
+        DocumentSnapshot ride = rideController.allRides.firstWhere( (e) => rideController.pendingRequests[index].get('ride_id') == e.id );
 
         return Padding(
-            padding: EdgeInsets.symmetric(vertical: 13),
+            padding: EdgeInsets.symmetric(vertical: 13,horizontal: 1),
 
-            child: RideBox( ride: rideController.ridesICancelled[index] , driver: driver , showCarDetails: false , shouldNavigate: true,));
+            child: RideBox( ride: ride , driver: user , showCarDetails: false , showOptions: true));
       }
-      , itemCount: rideController.ridesICancelled.length,)
+      , itemCount: rideController.pendingRequests.length,)
     );
   }
 
 
 }
-
-
-
-
-
-
-
-
-

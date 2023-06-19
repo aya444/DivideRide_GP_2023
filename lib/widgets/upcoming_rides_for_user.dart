@@ -64,7 +64,7 @@ class _RidesCardsState extends State<UpcomingRidesForUser> {
         return Padding(
             padding: EdgeInsets.symmetric(vertical: 13),
 
-            child: RideBox( ride: rideController.allRides[index] , driver: driver , showCarDetails: false ));
+            child: RideBox( ride: rideController.allRides[index] , driver: driver , showCarDetails: false , shouldNavigate: true,));
       }
       , itemCount: rideController.allRides.length,)
     );

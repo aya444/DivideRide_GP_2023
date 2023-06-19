@@ -10,9 +10,10 @@ class RideController extends GetxController {
   @override
   void onInit(){
     super.onInit();
-    getMyDocument();
+    //getMyDocument();
     getUsers();
     getRides();
+    getMyRequests();
   }
 
 
@@ -42,6 +43,9 @@ class RideController extends GetxController {
   RxList ridesIJoined = [].obs;
 
   RxList filteredAndArrangedRides = [].obs;
+
+  RxList myRequests = [].obs;
+
   RxList pendingRequests = [].obs;
 
 
@@ -51,6 +55,9 @@ class RideController extends GetxController {
   var isRidesLoading = false.obs;
 
   var isUsersLoading = false.obs;
+
+  var areRequestsLoading = false.obs;
+
 
   ///this method is for storing Ride Info into Firebase
   createRide(Map<String,dynamic> rideData) async {
@@ -177,23 +184,99 @@ class RideController extends GetxController {
   }
 
   /// Function to request to join a specific ride
-  requestToJoinRide(String rideId, String userId) async {
-    try {
-      // Get a reference to the ride document in Firestore to update to it
-      DocumentReference rideRef = FirebaseFirestore.instance.collection('rides').doc(rideId);
+  // requestToJoinRide(String rideId, String userId) async {
+  //   try {
+  //     // Get a reference to the ride document in Firestore to update to it
+  //     DocumentReference rideRef = FirebaseFirestore.instance.collection('rides').doc(rideId);
+  //
+  //     // Add the userId to the pending array in the ride document
+  //     await rideRef.update({
+  //       'pending': FieldValue.arrayUnion([userId]),
+  //     }).then((value) {
+  //       Get.snackbar('Success', 'Your request was sent successfully.',
+  //           colorText: Colors.white,backgroundColor: AppColors.greenColor);
+  //       isRideUploading(false);
+  //     });
+  //   } catch (e) {
+  //     print('Failed to send request to join ride: $e');
+  //   }
+  // }
 
-      // Add the userId to the pending array in the ride document
-      await rideRef.update({
+
+  requestToJoinRide(DocumentSnapshot ride, String userId) async {
+    try {
+
+      String driverId = ride.get('driver');
+
+      // Get a reference to the ride document in Firestore to update to it
+      await FirebaseFirestore.instance.collection('rides').doc(ride.id).set({
         'pending': FieldValue.arrayUnion([userId]),
-      }).then((value) {
-        Get.snackbar('Success', 'Your request was sent successfully.',
-            colorText: Colors.white,backgroundColor: AppColors.greenColor);
-        isRideUploading(false);
+
+      },SetOptions(merge: true)).then((value) {
+
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(driverId)
+            .collection('requests')
+            .add({'user_id': userId, 'ride_id': ride.id, 'status': 'Pending'});
+
       });
+
+      Get.snackbar('Success', 'Your request was sent successfully.',
+          colorText: Colors.white,backgroundColor: AppColors.greenColor);
+      isRideUploading(false);
+
     } catch (e) {
       print('Failed to send request to join ride: $e');
     }
   }
+
+
+  // getPendingRequests(){
+  //
+  //   pendingRequests.assignAll( ridesICreated.where((e){
+  //
+  //     List pendingIds = e.get('pending');
+  //
+  //     //return pendingIds.contains(FirebaseAuth.instance.currentUser!.uid);
+  //
+  //     return pendingIds;
+  //   }));
+  //
+  // }
+
+  getMyRequests(){
+
+    areRequestsLoading(true);
+    FirebaseFirestore.instance.collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid).collection('requests')
+        .snapshots().listen((event) {
+        myRequests.value = event.docs;
+        areRequestsLoading(false);
+    });
+
+ }
+
+ getPendingRequests(){
+
+   pendingRequests.assignAll( myRequests.where((e){
+
+     String status = e.get('status');
+
+     return status=='Pending';
+
+   }).toList());
+
+ }
+
+
+
+
+
+
+
+
+
 
 }
 

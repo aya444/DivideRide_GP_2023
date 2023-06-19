@@ -3,10 +3,10 @@ import '../../controller/ride_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/nearest_rides_cards.dart';
 
-class SearchRideListPage extends StatelessWidget {
+class NearestRidePage extends StatelessWidget {
   final RideController rideController;
 
-  const SearchRideListPage({
+  const NearestRidePage({
     Key? key,
     required this.rideController,
   }) : super(key: key);
@@ -26,7 +26,7 @@ class SearchRideListPage extends StatelessWidget {
               child: Column(children: const [
                 SizedBox(height: 30),
                 Expanded(
-                  child: RidesSearchCards(),
+                  child: NearestRidesCards(),
                 )
               ])),
         ));
