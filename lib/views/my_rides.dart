@@ -1,4 +1,5 @@
 import 'package:divide_ride/utils/app_colors.dart';
+import 'package:divide_ride/views/tabs/joined_tab.dart';
 import 'package:divide_ride/views/tabs/upcoming_tab.dart';
 import 'package:flutter/material.dart';
 
@@ -10,39 +11,37 @@ class MyRides extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: AppColors.greenColor,
-          title: Text('My Rides'),
+          title: Text('All Rides'),
           centerTitle: true,
           bottom: TabBar(
               isScrollable: true,
               labelColor: AppColors.whiteColor,
-              labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              labelStyle:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               unselectedLabelColor: Colors.grey[300],
               unselectedLabelStyle: const TextStyle(fontSize: 14),
               indicatorWeight: 3.0,
               padding: EdgeInsets.only(left: 30, right: 30),
               tabs: [
                 Tab(text: 'Upcoming Rides'),
+                Tab(text: 'Joined Rides'),
                 Tab(text: 'Rides History'),
                 // Tab(icon: Icon(Icons.settings )),
-              ]
-          ),
+              ]),
         ),
         body: Column(
           children: [
             Expanded(
-              child: TabBarView(
-                  children: [
+              child: TabBarView(children: [
 
                 UpcomingTab(),
+                JoinedTab(),
                 HistoryTab(),
-
-              ]
-
-              ),
+              ]),
             )
           ],
         ),
