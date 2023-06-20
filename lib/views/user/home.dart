@@ -21,6 +21,7 @@ import '../../controller/ride_controller.dart';
 import '../../widgets/green_button.dart';
 import '../../widgets/icon_title_widget.dart';
 import '../decision_screens/decision_screen.dart';
+import '../my_rides.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -642,7 +643,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: 'Payment History',
                     onPressed: () => Get.to(() => PaymentScreen())),
                 buildDrawerItem(
-                    title: 'Ride History', onPressed: () {}, isVisible: true),
+                    title: 'My Rides', onPressed: () => Get.to(()=> const MyRides())),
                 buildDrawerItem(title: 'Settings', onPressed: () {
                     Get.to(() => const MyProfile());
                 }),

@@ -26,7 +26,7 @@ class MyRides extends StatelessWidget {
               padding: EdgeInsets.only(left: 30, right: 30),
               tabs: [
                 Tab(text: 'Upcoming Rides'),
-                Tab(text: 'Ride History'),
+                Tab(text: 'Rides History'),
                 // Tab(icon: Icon(Icons.settings )),
               ]
           ),
