@@ -643,7 +643,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(() => PaymentScreen())),
                 //buildDrawerItem(title: 'Ride History', onPressed: () {}, isVisible: true),
-                buildDrawerItem(title: 'My Rides', onPressed: () => Get.to(()=> const MyRides())),
+                buildDrawerItem(title: 'All Rides', onPressed: () => Get.to(()=> const MyRides())),
                 buildDrawerItem(title: 'Settings', onPressed: () {Get.to(() => const MyProfile());}),
                 buildDrawerItem(title: 'Support', onPressed: () {}),
                 buildDrawerItem(title: 'Log Out', onPressed: () {
