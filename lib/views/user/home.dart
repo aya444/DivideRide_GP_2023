@@ -21,6 +21,7 @@ import '../../controller/ride_controller.dart';
 import '../../widgets/green_button.dart';
 import '../../widgets/icon_title_widget.dart';
 import '../decision_screens/decision_screen.dart';
+import '../my_rides.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -576,6 +577,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Drawer(
       child: Column(
         children: [
+          Obx(() => authController.myUser.value.name == null ? Center(child: CircularProgressIndicator()) :
           InkWell(
             onTap: () {
               Get.to(() => const MyProfile());
@@ -631,6 +633,7 @@ class _HomeScreenState extends State<HomeScreen> {
               )),
             ),
           ),
+          ),
           const SizedBox(
             height: 20,
           ),
@@ -638,21 +641,14 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.symmetric(horizontal: 30),
             child: Column(
               children: [
-                buildDrawerItem(
-                    title: 'Payment History',
-                    onPressed: () => Get.to(() => PaymentScreen())),
-                buildDrawerItem(
-                    title: 'Ride History', onPressed: () {}, isVisible: true),
-                buildDrawerItem(title: 'Settings', onPressed: () {
-                    Get.to(() => const MyProfile());
-                }),
+                buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(() => PaymentScreen())),
+                //buildDrawerItem(title: 'Ride History', onPressed: () {}, isVisible: true),
+                buildDrawerItem(title: 'My Rides', onPressed: () => Get.to(()=> const MyRides())),
+                buildDrawerItem(title: 'Settings', onPressed: () {Get.to(() => const MyProfile());}),
                 buildDrawerItem(title: 'Support', onPressed: () {}),
-                buildDrawerItem(
-                    title: 'Log Out',
-                    onPressed: () {
+                buildDrawerItem(title: 'Log Out', onPressed: () {
                       FirebaseAuth.instance.signOut();
-                      Get.to(() => DecisionScreen());
-                    }),
+                      Get.to(() => DecisionScreen());}),
               ],
             ),
           ),

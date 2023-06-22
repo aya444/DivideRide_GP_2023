@@ -47,9 +47,9 @@ class _NearestRidesCardsState extends State<NearestRidesCards> {
           //   print('No data available for Ride ID: ${ride.id}');
           // }
 
-          return Padding( padding: EdgeInsets.symmetric(vertical: 13),
+          return Padding( padding: EdgeInsets.symmetric(vertical: 13 , horizontal: 2),
 
-            child: RideBox( ride: ride, driver: driver, showCarDetails: false,),
+            child: RideBox( ride: ride, driver: driver, showCarDetails: false, shouldNavigate: true,),
 
           );
         },

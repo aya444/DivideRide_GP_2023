@@ -28,7 +28,7 @@ class _RidesCardsState extends State<HistoryRidesForUser> {
 
     print('length of allRides = ${rideController.allRides.length}');
     print('length of allUsers = ${rideController.allUsers.length}');
-    print("driver Id = ${FirebaseAuth.instance.currentUser!.uid} ");
+    print("user Id = ${FirebaseAuth.instance.currentUser!.uid} ");
 
   }
 
@@ -62,7 +62,7 @@ class _RidesCardsState extends State<HistoryRidesForUser> {
         DocumentSnapshot driver = rideController.allUsers.firstWhere( (e) => rideController.allRides[index].get('driver') == e.id );
 
         return Padding(
-            padding: EdgeInsets.symmetric(vertical: 13),
+            padding: EdgeInsets.symmetric(vertical: 13 , horizontal: 2),
 
             child: RideBox( ride: rideController.allRides[index] , driver: driver , showCarDetails: false, shouldNavigate: true,));
       }

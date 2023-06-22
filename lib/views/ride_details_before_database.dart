@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import '../controller/ride_controller.dart';
 import '../widgets/ride_box.dart';
 import '../widgets/text_widget.dart';
+import '../widgets/upcoming_rides_for_user.dart';
 
 class RideDetailsBeforeDatabase extends StatefulWidget {
 
@@ -24,6 +25,9 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
   RideController rideController = Get.find<RideController>();
 
   bool isDriver = false;
+
+
+
 
   @override
   void initState() {
@@ -42,6 +46,7 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
 
     //String rideId = widget.ride.id;
 
+    String maxSeats = widget.ride.get('max_seats');
 
     List pendingUsers = [];
 
@@ -51,6 +56,15 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
       pendingUsers = [];
     }
 
+    List joinedUsers = [];
+
+    try {
+      joinedUsers = widget.ride.get('joined');
+    } catch (e) {
+      joinedUsers = [];
+    }
+
+
     List rejectedUsers = [];
 
     try {
@@ -59,13 +73,6 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
       rejectedUsers = [];
     }
 
-    List joinedUsers = [];
-
-    try {
-      joinedUsers = widget.ride.get('joined');
-    } catch (e) {
-      joinedUsers = [];
-    }
 
 
 
@@ -204,70 +211,148 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
             ] else ...[
               Row(
                 children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        Get.defaultDialog(
-                          title: "Are you sure to join this ride?",
-                          content: Container(),
-                          //barrierDismissible: false,
-                          actions: [
-                            MaterialButton(
-                              onPressed: () {
-                                 Get.back();
-                                rideController.isRideUploading(true);
-                                rideController.requestToJoinRide(
-                                    widget.ride, userId);
-                              },
-                              child: textWidget(
-                                text: 'Confirm',
-                                color: Colors.white,
-                              ),
-                              color: AppColors.greenColor,
-                              shape: StadiumBorder(),
-                            ),
-                            SizedBox(width: 7),
-                            MaterialButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              child: textWidget(
-                                text: 'Cancel',
-                                color: Colors.white,
-                              ),
-                              color: Colors.red,
-                              shape: StadiumBorder(),
-                            ),
-                          ],
-                        );
-                      },
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(13),
-                            color: pendingUsers.contains(userId) ? AppColors.yellow.withOpacity(0.9) : AppColors.greenColor.withOpacity(0.9)
-                        ),
-                        child: Center(
-                          child: pendingUsers.contains(userId) ?
-                          Text(
-                              "Pending",
-                              style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                            )
-                          ) : Text(
-                              "Send Request",
-                              style: TextStyle(
+                  Obx(() => rideController.isRequestLoading.value ? Center(child: CircularProgressIndicator(),) :
+
+
+                    pendingUsers.contains(userId) ? Expanded(
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(13),
+                          color: AppColors.yellow.withOpacity(0.9)
+                      ),
+                      child: Center(
+                          child: Text(
+                            "Pending",
+                            style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
                               fontSize: 16,
                             ),
                           )
-                        ),
                       ),
                     ),
-                  ),
+                  ) : joinedUsers.contains(userId) ?
+                    Expanded(
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(13),
+                            color: AppColors.greenColor.withOpacity(0.9)
+                        ),
+                        child: Center(
+                            child: Text(
+                              "Joined",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                              ),
+                            )
+                        ),
+                      ),
+                    ) : rejectedUsers.contains(userId) ?
+                    Expanded(
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(13),
+                            color: Colors.red.shade700,
+                        ),
+                        child: Center(
+                            child: Text(
+                              "Rejected",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                              ),
+                            )
+                        ),
+                      ),
+                    ) : maxSeats=="0 seats" ?
+                    Expanded(
+                      child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(13),
+                      color: AppColors.greenColor,
+                      ),
+                      child: Center(
+                      child: Text(
+                      "No Seats Available",
+                      style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                      ),
+                      )
+                      ),
+                      ),
+                      )
+
+
+                    : Expanded(
+                      child: InkWell(onTap: () {
+                            Get.defaultDialog(
+                              title: "Are you sure to join this ride ?",
+                              content: Container(),
+                              //barrierDismissible: false,
+                              actions: [
+                                MaterialButton(
+                                  onPressed: () {
+
+                                    Get.back();
+
+                                    rideController.isRequestLoading(true);
+                                    rideController.requestToJoinRide(
+                                        widget.ride, userId);
+
+                                    Get.back();
+
+                                  },
+                                  child: textWidget(
+                                    text: 'Confirm',
+                                    color: Colors.white,
+                                  ),
+                                  color: AppColors.greenColor,
+                                  shape: StadiumBorder(),
+                                ),
+                                SizedBox(width: 7),
+                                MaterialButton(
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                  child: textWidget(
+                                    text: 'Cancel',
+                                    color: Colors.white,
+                                  ),
+                                  color: Colors.red,
+                                  shape: StadiumBorder(),
+                                ),
+                              ],
+                            );
+                          }, child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(13),
+                                color: AppColors.greenColor.withOpacity(0.9)
+                            ),
+                            child: Center(
+                                child: Text(
+                                  "Send Request",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                  ),
+                                )
+                            ),
+                          )),),
+
+
+
+                  )
                   // SizedBox(
                   //   width: 10,
                   // ),

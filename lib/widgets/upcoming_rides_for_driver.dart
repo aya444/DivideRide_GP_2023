@@ -55,7 +55,7 @@ class _UpcomingRidesForDriverState extends State<UpcomingRidesForDriver> {
         DocumentSnapshot driver = rideController.myDocument!;
 
         return Padding(
-            padding: EdgeInsets.symmetric(vertical: 13),
+            padding: EdgeInsets.symmetric(vertical: 13, horizontal: 2),
 
             child: RideBox( ride: rideController.ridesICreated[index] , driver: driver , showCarDetails: false , shouldNavigate: true,));
       }

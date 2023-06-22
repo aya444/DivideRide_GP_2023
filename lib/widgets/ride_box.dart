@@ -1,5 +1,10 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:divide_ride/controller/ride_controller.dart';
 import 'package:divide_ride/widgets/rides_cards.dart';
+import 'package:divide_ride/widgets/text_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -9,46 +14,56 @@ import '../models/driver_model/driver_model.dart';
 import '../utils/app_colors.dart';
 import '../views/ride_details_before_database.dart';
 
-class RideBox extends StatelessWidget {
+class RideBox extends StatefulWidget {
 
   final DocumentSnapshot ride;
   final DocumentSnapshot driver;
   final bool showCarDetails;
   final bool showOptions;
   final bool shouldNavigate;
+  DocumentSnapshot? request;
 
-  const RideBox({super.key, required this.ride , required this.driver , required this.showCarDetails , this.showOptions = false , this.shouldNavigate=false});
+  RideBox({super.key, required this.ride , required this.driver , required this.showCarDetails , this.showOptions = false , this.shouldNavigate=false , this.request});
 
+  @override
+  State<RideBox> createState() => _RideBoxState();
+}
 
+class _RideBoxState extends State<RideBox> {
+
+  RideController rideController = Get.find<RideController>();
 
   @override
   Widget build(BuildContext context) {
-    
-    
+
+
+    String userId = widget.driver.id;
+
     List dateInformation = [];
     try{
-      dateInformation = ride.get('date').toString().split('-');
+      dateInformation = widget.ride.get('date').toString().split('-');
     }catch(e){
       dateInformation = [];
     }
 
 
 
+
     return InkWell(
       onTap: () {
-        if(showCarDetails == false){
-          if(showOptions == true || shouldNavigate == false){
+        if(widget.showCarDetails == false){
+          if(widget.showOptions == true || widget.shouldNavigate == false){
 
           }
           else{
-            Get.to(()=> RideDetailsBeforeDatabase(ride , driver));
+            Get.to(()=> RideDetailsBeforeDatabase(widget.ride , widget.driver));
           }
 
         }
       },
       child: Container(
         width: double.maxFinite,
-        height: showCarDetails || showOptions ? 260 : 215,
+        height: widget.showCarDetails || widget.showOptions ? 260 : 215,
         padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
         decoration: BoxDecoration(
 
@@ -73,13 +88,13 @@ class RideBox extends StatelessWidget {
               leading: CircleAvatar(
                 radius:25,
                 backgroundImage: NetworkImage(
-                  driver.get('image')!,
+                  widget.driver.get('image')!,
                   // width: 45,
                   // fit: BoxFit.cover,
                 ),
               ),
               title: Text(
-              '${driver.get('name')}', //DriverDoc!.get('driver_name')
+              '${widget.driver.get('name')}', //DriverDoc!.get('driver_name')
               overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 style: TextStyle(
@@ -138,7 +153,7 @@ class RideBox extends StatelessWidget {
                           child: SizedBox(
                             width: double.maxFinite,
                             child: Text(
-                              'From: ${ride.get('pickup_address')}',
+                              'From: ${widget.ride.get('pickup_address')}',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -167,7 +182,7 @@ class RideBox extends StatelessWidget {
                           child: SizedBox(
                             width: double.maxFinite,
                             child: Text(
-                              'To: ${ride.get('destination_address')}',
+                              'To: ${widget.ride.get('destination_address')}',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -221,7 +236,7 @@ class RideBox extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${ride.get('start_time')}',
+                        '${widget.ride.get('start_time')}',
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -232,10 +247,10 @@ class RideBox extends StatelessWidget {
                   ),
                 ),
 
-                if(!showCarDetails)... [
+                if(!widget.showCarDetails)... [
                   Spacer(),
                   myText(
-                    text: '${ride.get('price_per_seat')} EGP',
+                    text: '${widget.ride.get('price_per_seat')} EGP',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -249,29 +264,75 @@ class RideBox extends StatelessWidget {
 
             ),
 
-            if(showOptions)...[
+            if(widget.showOptions)...[
 
               const SizedBox(height: 10),
 
+              Obx(() => rideController.isRequestLoading.value
+              ? Center(
+              child: CircularProgressIndicator(),
+              ) :
               Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      //width: 200,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 8.0,
-                      ),
-                      decoration: BoxDecoration(
-                          color: AppColors.greenColor,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Center(
-                        child: Text(
-                          "Accept",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
+                    child: InkWell(
+                      onTap: () {
+                        Get.defaultDialog(
+                          title: "Are you sure to accept this request ?",
+                          content: Container(),
+                          //barrierDismissible: false,
+                          actions: [
+                            MaterialButton(
+                              onPressed: () {
+
+                                Get.back();
+
+                                rideController.isRequestLoading(true);
+                                rideController.acceptRequest(
+                                    widget.ride, widget.request);
+
+                                Get.back();
+
+                                },
+                              child: textWidget(
+                                text: 'Confirm',
+                                color: Colors.white,
+                              ),
+                              color: AppColors.greenColor,
+                              shape: StadiumBorder(),
+                            ),
+                            SizedBox(width: 7),
+                            MaterialButton(
+                              onPressed: () {
+                                Get.back();
+                              },
+                              child: textWidget(
+                                text: 'Cancel',
+                                color: Colors.white,
+                              ),
+                              color: Colors.red,
+                              shape: StadiumBorder(),
+                            ),
+                          ],
+                        );
+                      },
+                      child: Container(
+                        //width: 200,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 8.0,
+                        ),
+                        decoration: BoxDecoration(
+                            color: AppColors.greenColor,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Center(
+                          child: Text(
+                            "Accept",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
@@ -281,22 +342,62 @@ class RideBox extends StatelessWidget {
                     width: 10,
                   ),
                   Expanded(
-                    child: Container(
-                      //width: 200,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 8.0,
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.red.shade700,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Center(
-                        child: Text(
-                          "Reject",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
+                    child: InkWell(
+                      onTap: (){
+                        Get.defaultDialog(
+                          title: "Are you sure to reject this request ?",
+                          content: Container(),
+                          //barrierDismissible: false,
+                          actions: [
+                            MaterialButton(
+                              onPressed: () {
+                                Get.back();
+
+                                rideController.isRequestLoading(true);
+                                rideController.rejectRequest(
+                                    widget.ride, widget.request);
+
+                                Get.back();
+                              },
+                              child: textWidget(
+                                text: 'Confirm',
+                                color: Colors.white,
+                              ),
+                              color: AppColors.greenColor,
+                              shape: StadiumBorder(),
+                            ),
+                            SizedBox(width: 7),
+                            MaterialButton(
+                              onPressed: () {
+                                Get.back();
+                              },
+                              child: textWidget(
+                                text: 'Cancel',
+                                color: Colors.white,
+                              ),
+                              color: Colors.red,
+                              shape: StadiumBorder(),
+                            ),
+                          ],
+                        );
+                      },
+                      child: Container(
+                        //width: 200,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 8.0,
+                        ),
+                        decoration: BoxDecoration(
+                            color: Colors.red.shade700,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Center(
+                          child: Text(
+                            "Reject",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
@@ -305,9 +406,11 @@ class RideBox extends StatelessWidget {
                 ],
               )
 
+              )
+
             ],
 
-            if(showCarDetails)...[
+            if(widget.showCarDetails)...[
 
               const SizedBox(height: 10),
 
@@ -332,7 +435,7 @@ class RideBox extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.only(left: 6, right: 8),
                         child: Text(
-                          '${driver.get('Vehicle_make')} ${driver.get('Vehicle_model')}',
+                          '${widget.driver.get('Vehicle_make')} ${widget.driver.get('Vehicle_model')}',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -347,7 +450,7 @@ class RideBox extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${driver.get('Vehicle_color')}',
+                        '${widget.driver.get('Vehicle_color')}',
                         style: TextStyle(
                           color: Colors.white,
                         ),

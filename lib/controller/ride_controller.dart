@@ -1,6 +1,12 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/utils/app_colors.dart';
+import 'package:divide_ride/views/driver/accepted_requests_view.dart';
+import 'package:divide_ride/views/driver/pending_requests_view.dart';
+import 'package:divide_ride/views/ride_requests.dart';
+import 'package:divide_ride/views/tabs/accepted_tab.dart';
+import 'package:divide_ride/views/tabs/pending_tab.dart';
+import 'package:divide_ride/widgets/upcoming_rides_for_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,22 +19,19 @@ class RideController extends GetxController {
     //getMyDocument();
     getUsers();
     getRides();
-    getMyRequests();
+    //getMyRequests();
   }
 
 
   FirebaseAuth auth = FirebaseAuth.instance;
 
-  DocumentSnapshot? myDocument;
+  late DocumentSnapshot myDocument;
 
   getMyDocument(){
     FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid)
         .snapshots().listen((event) {
       myDocument = event;
     });
-    if (myDocument == null){
-      return;
-    }
   }
 
 
@@ -48,6 +51,9 @@ class RideController extends GetxController {
 
   RxList pendingRequests = [].obs;
 
+  RxList acceptedRequests = [].obs;
+
+  RxList rejectedRequests = [].obs;
 
 
   var isRideUploading = false.obs;
@@ -56,7 +62,7 @@ class RideController extends GetxController {
 
   var isUsersLoading = false.obs;
 
-  var areRequestsLoading = false.obs;
+  var isRequestLoading = false.obs;
 
 
   ///this method is for storing Ride Info into Firebase
@@ -206,6 +212,7 @@ class RideController extends GetxController {
   requestToJoinRide(DocumentSnapshot ride, String userId) async {
     try {
 
+
       String driverId = ride.get('driver');
 
       // Get a reference to the ride document in Firestore to update to it
@@ -224,7 +231,7 @@ class RideController extends GetxController {
 
       Get.snackbar('Success', 'Your request was sent successfully.',
           colorText: Colors.white,backgroundColor: AppColors.greenColor);
-      isRideUploading(false);
+      isRequestLoading(false);
 
     } catch (e) {
       print('Failed to send request to join ride: $e');
@@ -247,12 +254,12 @@ class RideController extends GetxController {
 
   getMyRequests(){
 
-    areRequestsLoading(true);
+    isRequestLoading(true);
     FirebaseFirestore.instance.collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid).collection('requests')
         .snapshots().listen((event) {
         myRequests.value = event.docs;
-        areRequestsLoading(false);
+        isRequestLoading(false);
     });
 
  }
@@ -265,9 +272,126 @@ class RideController extends GetxController {
 
      return status=='Pending';
 
+
    }).toList());
 
  }
+
+  getAcceptedRequests(){
+
+    acceptedRequests.assignAll( myRequests.where((e){
+
+      String status = e.get('status');
+
+      return status=='Accepted';
+
+    }).toList());
+
+  }
+
+
+  getRejectedRequests(){
+
+    rejectedRequests.assignAll( myRequests.where((e){
+
+      String status = e.get('status');
+
+      return status=='Rejected';
+
+    }).toList());
+
+  }
+
+
+
+ acceptRequest(DocumentSnapshot ride , DocumentSnapshot? request) async{
+
+
+   String driverId = ride.get('driver');
+   String userId = request!.get('user_id');
+   String requestId = request!.id;
+   int seat = 0;
+   String maxSeats = "";
+
+   List seatInformation = [];
+   try{
+
+     seatInformation = ride.get('max_seats').toString().split(' ');
+     seat = int.parse(seatInformation[0]) - 1;
+     maxSeats = seat == 1 ? '$seat seat' : '$seat seats';
+
+   }catch(e){
+     print('exception');
+     seatInformation = [];
+   }
+
+
+   await FirebaseFirestore.instance.collection('rides').doc(ride.id).set({
+     'pending': FieldValue.arrayRemove([userId]),
+     'joined': FieldValue.arrayUnion([userId]),
+     'max_seats': maxSeats,
+
+   },SetOptions(merge: true)).then((value) async {
+
+     await FirebaseFirestore.instance
+         .collection('users')
+         .doc(driverId)
+         .collection('requests')
+         .doc(requestId).set({
+
+          'status': 'Accepted'
+
+     },SetOptions(merge: true)).then((value) {
+
+
+       Get.snackbar('Success', 'Your request was accepted successfully.',
+           colorText: Colors.white,backgroundColor: AppColors.greenColor);
+
+
+       isRequestLoading(false);
+
+
+
+     });
+
+   });
+
+ }
+
+  rejectRequest(DocumentSnapshot ride , DocumentSnapshot? request) async{
+
+
+    String driverId = ride.get('driver');
+    String userId = request!.get('user_id');
+    String requestId = request!.id;
+
+    await FirebaseFirestore.instance.collection('rides').doc(ride.id).set({
+      'pending': FieldValue.arrayRemove([userId]),
+      'rejected': FieldValue.arrayUnion([userId]),
+
+    },SetOptions(merge: true)).then((value) {
+
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(driverId)
+          .collection('requests')
+          .doc(requestId).set({
+
+        'status': 'Rejected'
+
+      },SetOptions(merge: true)).then((value) {
+
+        Get.snackbar('Success', 'Your request was rejected successfully.',
+            colorText: Colors.white,backgroundColor: AppColors.greenColor);
+
+        isRequestLoading(false);
+
+      });
+
+    });
+
+  }
+
 
 
 

@@ -42,7 +42,7 @@ class _VerificaitonPendingScreenState extends State<VerificaitonPendingScreen> {
               const SizedBox(height: 30,),
 
               //Get.offAll is to remove all pages before
-              greenCustomButton('Get started', () {   Get.offAll(()=> DriverHomeScreen());  } ),
+              greenCustomButton('Get started', () {   Get.off(()=> DriverHomeScreen());  } ),
 
 
 

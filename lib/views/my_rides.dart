@@ -1,20 +1,44 @@
 import 'package:divide_ride/utils/app_colors.dart';
+import 'package:divide_ride/views/tabs/joined_tab.dart';
 import 'package:divide_ride/views/tabs/upcoming_tab.dart';
 import 'package:flutter/material.dart';
 
+import '../shared preferences/shared_pref.dart';
+import '../utils/app_constants.dart';
 import 'tabs/history_tab.dart';
 
-class MyRides extends StatelessWidget {
+class MyRides extends StatefulWidget {
   const MyRides({Key? key}) : super(key: key);
+
+  @override
+  State<MyRides> createState() => _MyRidesState();
+}
+
+class _MyRidesState extends State<MyRides> {
+
+  bool isDriver = false;
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    isDriver = CacheHelper.getData(key: AppConstants.decisionKey) ?? false ;
+
+    print(isDriver.toString());
+
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: isDriver ? 2 : 3,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: AppColors.greenColor,
-          title: Text('My Rides'),
+          title: Text('All Rides'),
           centerTitle: true,
           bottom: TabBar(
               isScrollable: true,
@@ -25,7 +49,8 @@ class MyRides extends StatelessWidget {
               indicatorWeight: 3.0,
               padding: EdgeInsets.only(left: 30, right: 30),
               tabs: [
-                Tab(text: 'Upcoming Rides'),
+                Tab(text: isDriver ? 'Upcoming Rides' : 'Available Rides'),
+                if(isDriver)...[] else...[ Tab(text: 'Joined') ],
                 Tab(text: 'Ride History'),
                 // Tab(icon: Icon(Icons.settings )),
               ]
@@ -38,6 +63,7 @@ class MyRides extends StatelessWidget {
                   children: [
 
                 UpcomingTab(),
+                    if(isDriver)... [] else...[JoinedTab()],
                 HistoryTab(),
 
               ]
