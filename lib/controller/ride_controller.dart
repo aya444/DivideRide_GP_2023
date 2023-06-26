@@ -1,20 +1,14 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/utils/app_colors.dart';
-import 'package:divide_ride/views/driver/accepted_requests_view.dart';
-import 'package:divide_ride/views/driver/pending_requests_view.dart';
-import 'package:divide_ride/views/ride_requests.dart';
-import 'package:divide_ride/views/tabs/accepted_tab.dart';
-import 'package:divide_ride/views/tabs/pending_tab.dart';
-import 'package:divide_ride/widgets/upcoming_rides_for_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class RideController extends GetxController {
-
   @override
-  void onInit(){
+  void onInit() {
     super.onInit();
     //getMyDocument();
     getUsers();
@@ -22,115 +16,254 @@ class RideController extends GetxController {
     //getMyRequests();
   }
 
-
   FirebaseAuth auth = FirebaseAuth.instance;
 
   late DocumentSnapshot myDocument;
 
-  getMyDocument(){
-    FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid)
-        .snapshots().listen((event) {
+  getMyDocument() {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(auth.currentUser!.uid)
+        .snapshots()
+        .listen((event) {
       myDocument = event;
     });
   }
 
-
-
   RxList allUsers = [].obs;
   RxList allRides = [].obs;
 
-  RxList ridesICreated = [].obs;
+  RxList ridesICreated = [].obs; // Rides with all dates
+  RxList ridesICancelled = [].obs; // Rides that were cancelled
+  RxList ridesIJoined = [].obs; // Rides user joined it
+  RxList ridesIEnded = [].obs; // Rides that were ended
 
-  RxList ridesICancelled = [].obs;
+  RxList upcomingRidesForDriver = [].obs; // Rides with upcoming date for driver
+  RxList upcomingRidesForUser = [].obs; // Rides with upcoming date for user
 
-  RxList ridesIJoined = [].obs;
+  RxList driverHistory = [].obs; // Rides that ended or cancelled for driver
+  RxList userHistory = [].obs; // Rides that ended or cancelled for user
+
+  RxList driverCurrentRide = [].obs; // contains the driver current ride
+  RxList userCurrentRide = [].obs; // contains the user current ride
 
   RxList filteredAndArrangedRides = [].obs;
 
   RxList myRequests = [].obs;
-
   RxList pendingRequests = [].obs;
-
   RxList acceptedRequests = [].obs;
-
   RxList rejectedRequests = [].obs;
 
-
   var isRideUploading = false.obs;
-
   var isRidesLoading = false.obs;
-
   var isUsersLoading = false.obs;
-
   var isRequestLoading = false.obs;
 
 
+  // Main Functionalities
   ///this method is for storing Ride Info into Firebase
-  createRide(Map<String,dynamic> rideData) async {
-
-    await FirebaseFirestore.instance.collection('rides')
+  createRide(Map<String, dynamic> rideData) async {
+    await FirebaseFirestore.instance
+        .collection('rides')
         .add(rideData)
         .then((value) {
       Get.snackbar('Success', 'Your ride is created successfully.',
-          colorText: Colors.white,backgroundColor: AppColors.greenColor);
+          colorText: Colors.white, backgroundColor: AppColors.greenColor);
       isRideUploading(false);
-    }).catchError((e){
+    }).catchError((e) {});
+  }
 
+  /// this method allows the driver to cancel his ride
+  cancelRide(String rideId) async {
+    try {
+      // Get a reference to the ride document in Firestore to update to it
+      DocumentReference rideRef =
+      FirebaseFirestore.instance.collection('rides').doc(rideId);
+
+      // Add the userId to the pending array in the ride document
+      await rideRef.update({
+        'status': "Cancelled",
+      }).then((value) {
+        Get.snackbar('Success', 'Your ride was canceled',
+            colorText: Colors.white, backgroundColor: Colors.red);
+        isRideUploading(false);
+      });
+    } catch (e) {
+      print('Failed to cancel ride: $e');
+    }
+  }
+
+  /// this method allows the driver to start his ride
+  startRide(String rideId) async {
+    try {
+      // Get a reference to the ride document in Firestore to update to it
+      DocumentReference rideRef =
+      FirebaseFirestore.instance.collection('rides').doc(rideId);
+
+      // Add the userId to the pending array in the ride document
+      await rideRef.update({
+        'status': "Started",
+      }).then((value) {
+        Get.snackbar('Success', 'Have a safe journey!',
+            colorText: Colors.white, backgroundColor: AppColors.greenColor);
+        isRideUploading(false);
+      });
+    } catch (e) {
+      print('Failed to start ride: $e');
+    }
+  }
+
+   reloadRideData(String rideId) async {
+    try {
+      // Get a reference to the ride document in Firestore
+      DocumentSnapshot rideSnapshot = await FirebaseFirestore.instance
+          .collection('rides')
+          .doc(rideId)
+          .get();
+
+
+      // Update the ride data in the controller
+      int index = driverCurrentRide.indexWhere((ride) => ride['id'] == rideId);
+      if (index != -1) {
+        driverCurrentRide[index] = rideSnapshot.data() as Map<String, dynamic>;
+        update();
+      }
+    } catch (e) {
+      print('Failed to reload ride data: $e');
+    }
+  }
+
+
+  /// this method allows the driver to end his ride
+  endRide(String rideId) async {
+    try {
+      // Get a reference to the ride document in Firestore to update to it
+      DocumentReference rideRef =
+      FirebaseFirestore.instance.collection('rides').doc(rideId);
+
+      // Add the userId to the pending array in the ride document
+      await rideRef.update({
+        'status': "Ended",
+      }).then((value) {
+        Get.snackbar('Success', 'You have ended the ride!',
+            colorText: Colors.white, backgroundColor: AppColors.greenColor);
+        isRideUploading(false);
+      });
+    } catch (e) {
+      print('Failed to end ride: $e');
+    }
+  }
+
+  /// this method allows the user to send request to driver to join him on the ride
+  requestToJoinRide(DocumentSnapshot ride, String userId) async {
+    try {
+      String driverId = ride.get('driver');
+
+      // Get a reference to the ride document in Firestore to update to it
+      await FirebaseFirestore.instance.collection('rides').doc(ride.id).set({
+        'pending': FieldValue.arrayUnion([userId]),
+      }, SetOptions(merge: true)).then((value) {
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(driverId)
+            .collection('requests')
+            .add({'user_id': userId, 'ride_id': ride.id, 'status': 'Pending'});
+      });
+
+      Get.snackbar('Success', 'Your request was sent successfully.',
+          colorText: Colors.white, backgroundColor: AppColors.greenColor);
+      isRequestLoading(false);
+    } catch (e) {
+      print('Failed to send request to join ride: $e');
+    }
+  }
+
+  /// this method allows the driver to accept the request made by the user to join his ride
+  acceptRequest(DocumentSnapshot ride, DocumentSnapshot? request) async {
+    String driverId = ride.get('driver');
+    String userId = request!.get('user_id');
+    String requestId = request!.id;
+    int seat = 0;
+    String maxSeats = "";
+
+    List seatInformation = [];
+    try {
+      seatInformation = ride.get('max_seats').toString().split(' ');
+      seat = int.parse(seatInformation[0]) - 1;
+      maxSeats = seat == 1 ? '$seat seat' : '$seat seats';
+    } catch (e) {
+      print('exception');
+      seatInformation = [];
+    }
+
+    await FirebaseFirestore.instance.collection('rides').doc(ride.id).set({
+      'pending': FieldValue.arrayRemove([userId]),
+      'joined': FieldValue.arrayUnion([userId]),
+      'max_seats': maxSeats,
+    }, SetOptions(merge: true)).then((value) async {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(driverId)
+          .collection('requests')
+          .doc(requestId)
+          .set({'status': 'Accepted'}, SetOptions(merge: true)).then((value) {
+        Get.snackbar('Success', 'Your request was accepted successfully.',
+            colorText: Colors.white, backgroundColor: AppColors.greenColor);
+
+        isRequestLoading(false);
+      });
     });
   }
 
-  ///this method is getting all Users from the database and store inside allUsers list
-  getUsers(){
+  /// this method allows the driver to reject the request made by the user to join his ride
+  rejectRequest(DocumentSnapshot ride, DocumentSnapshot? request) async {
+    String driverId = ride.get('driver');
+    String userId = request!.get('user_id');
+    String requestId = request!.id;
 
-    isUsersLoading(true);
-    FirebaseFirestore.instance.collection('users').snapshots().listen((event) {
+    await FirebaseFirestore.instance.collection('rides').doc(ride.id).set({
+      'pending': FieldValue.arrayRemove([userId]),
+      'rejected': FieldValue.arrayUnion([userId]),
+    }, SetOptions(merge: true)).then((value) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(driverId)
+          .collection('requests')
+          .doc(requestId)
+          .set({'status': 'Rejected'}, SetOptions(merge: true)).then((value) {
+        Get.snackbar('Success', 'Your request was rejected successfully.',
+            colorText: Colors.white, backgroundColor: AppColors.greenColor);
 
-      allUsers.assignAll( event.docs ) ;
-      isUsersLoading(false);
-
+        isRequestLoading(false);
+      });
     });
-
   }
 
-  ///this method is getting all Rides from the database and store inside allRides list
-  getRides(){
-
-    isRidesLoading(true);
-    FirebaseFirestore.instance.collection('rides').snapshots().listen((event) {
-      allRides.assignAll( event.docs );
-      isRidesLoading(false);
-    });
-
-  }
-
-  ///this method is getting all rides Created by Specific Driver from the database and store inside RidesICreated list
-  getRidesICreated(){
-
-    ridesICreated.assignAll( allRides.where((e){
-      String driverId = e.get('driver');
-      String status = e.get('status');
-
-      return driverId.contains(FirebaseAuth.instance.currentUser!.uid) && status=='Upcoming';
-
-    }).toList());
-  }
-
-
+  /// this method find all rides with the sam destination and date given by user then arrange them from the nearest in distance to furthest
   void findAndArrangeRides(Map<String, dynamic> searchRideInfo) {
     String destinationAddress = searchRideInfo['destination_address'];
     String date = searchRideInfo['date'];
+    DateTime currentDateTime  = DateTime.now();
 
     // filter rides based on destination and date
     List filteredRides = allRides.where((ride) {
       String rideDestination = ride.get('destination_address');
       String rideDate = ride.get('date');
-      return rideDestination == destinationAddress && rideDate == date;
+      String status = ride['status'];
+      // String rideStatus = ride.get('status');
+      String startTime = ride.get('start_time');
+
+      // Parse ride's date and start time
+      DateTime rideDateTime = DateFormat('dd-MM-yyyy hh:mm a').parse('$rideDate $startTime');
+      return rideDestination == destinationAddress && rideDate == date && rideDateTime.isAfter(currentDateTime) && status != 'Cancelled' && status != 'Ended';
     }).toList();
 
     // Sort the filtered rides based on proximity to the source location
     filteredRides.sort((a, b) {
-      double distanceA = calculateDistance(a.get('pickup_latlng'), searchRideInfo['pickup_latlng']);
-      double distanceB = calculateDistance(b.get('pickup_latlng'), searchRideInfo['pickup_latlng']);
+      double distanceA = calculateDistance(
+          a.get('pickup_latlng'), searchRideInfo['pickup_latlng']);
+      double distanceB = calculateDistance(
+          b.get('pickup_latlng'), searchRideInfo['pickup_latlng']);
       return distanceA.compareTo(distanceB);
     });
 
@@ -161,246 +294,334 @@ class RideController extends GetxController {
 
   double _toRadians(double degree) {
     return degree * pi / 180; // Convert degree to radians
-
   }
 
+  // Getters
+  ///this method is getting all Users from the database and store inside allUsers list
+  getUsers() {
+    isUsersLoading(true);
+    FirebaseFirestore.instance.collection('users').snapshots().listen((event) {
+      allUsers.assignAll(event.docs);
+      isUsersLoading(false);
+    });
+  }
 
-  getRidesICancelled(){
+  ///this method is getting all Rides from the database and store inside allRides list
+  getRides() {
+    isRidesLoading(true);
+    FirebaseFirestore.instance.collection('rides').snapshots().listen((event) {
+      allRides.assignAll(event.docs);
+      isRidesLoading(false);
+    });
+  }
 
-    ridesICancelled.assignAll( allRides.where((e){
+  ///this method is getting all rides Created by Specific Driver from the database and store inside RidesICreated list
+  getRidesICreated() {
+    ridesICreated.assignAll(allRides.where((e) {
       String driverId = e.get('driver');
       String status = e.get('status');
 
-      return driverId.contains(FirebaseAuth.instance.currentUser!.uid) && status=='Cancelled';
-
+      return driverId.contains(FirebaseAuth.instance.currentUser!.uid) &&
+          status == 'Upcoming';
     }).toList());
   }
 
+  ///this method gets length of joined array in ride entity
+  getJoinedArrayLength(String rideId) async {
+    final rideSnapshot = await FirebaseFirestore.instance
+        .collection('rides')
+        .doc(rideId)
+        .get();
 
-  getRidesIJoined(){
+    if (rideSnapshot.exists && rideSnapshot.data() != null) {
+      final joinedArray = rideSnapshot.data()!['joined'] as List<dynamic>;
+      return joinedArray.length;
+    }
 
-    ridesIJoined.assignAll( allRides.where((e){
-
-      List joinedIds = e.get('joined');
-
-      return joinedIds.contains(FirebaseAuth.instance.currentUser!.uid);
-
-    }).toList());
-
+    return 0; // Default value if the 'joined' array doesn't exist or ride doesn't exist
   }
 
-  /// Function to request to join a specific ride
-  // requestToJoinRide(String rideId, String userId) async {
-  //   try {
-  //     // Get a reference to the ride document in Firestore to update to it
-  //     DocumentReference rideRef = FirebaseFirestore.instance.collection('rides').doc(rideId);
-  //
-  //     // Add the userId to the pending array in the ride document
-  //     await rideRef.update({
-  //       'pending': FieldValue.arrayUnion([userId]),
-  //     }).then((value) {
-  //       Get.snackbar('Success', 'Your request was sent successfully.',
-  //           colorText: Colors.white,backgroundColor: AppColors.greenColor);
-  //       isRideUploading(false);
-  //     });
-  //   } catch (e) {
-  //     print('Failed to send request to join ride: $e');
-  //   }
-  // }
+  getJoinedArray(String rideId) async {
+    final rideSnapshot = await FirebaseFirestore.instance
+        .collection('rides')
+        .doc(rideId)
+        .get();
 
-
-  requestToJoinRide(DocumentSnapshot ride, String userId) async {
-    try {
-
-
-      String driverId = ride.get('driver');
-
-      // Get a reference to the ride document in Firestore to update to it
-      await FirebaseFirestore.instance.collection('rides').doc(ride.id).set({
-        'pending': FieldValue.arrayUnion([userId]),
-
-      },SetOptions(merge: true)).then((value) {
-
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(driverId)
-            .collection('requests')
-            .add({'user_id': userId, 'ride_id': ride.id, 'status': 'Pending'});
-
-      });
-
-      Get.snackbar('Success', 'Your request was sent successfully.',
-          colorText: Colors.white,backgroundColor: AppColors.greenColor);
-      isRequestLoading(false);
-
-    } catch (e) {
-      print('Failed to send request to join ride: $e');
+    if (rideSnapshot.exists && rideSnapshot.data() != null) {
+      final joinedArray = rideSnapshot.data()!['joined'] as List<dynamic>;
+      return joinedArray;
     }
   }
 
+  /// this method gets the current ride for the driver
+  getOngoingRideForDriver() {
+    DateTime currentDate = DateTime.now();
+    DateTime previous30Minutes = currentDate.subtract(Duration(minutes: 30));
+    DateTime next3Hours = currentDate.add(Duration(hours: 3));
 
-  // getPendingRequests(){
-  //
-  //   pendingRequests.assignAll( ridesICreated.where((e){
-  //
-  //     List pendingIds = e.get('pending');
-  //
-  //     //return pendingIds.contains(FirebaseAuth.instance.currentUser!.uid);
-  //
-  //     return pendingIds;
-  //   }));
-  //
-  // }
+    List tempArray = ridesICreated.where((ride) {
+      String driverId = ride['driver'];
+      String status = ride['status'];
+      DateTime rideDate = DateFormat('dd-MM-yyyy').parse(ride['date']);
+      DateTime startTime = DateFormat('hh:mm a').parse(ride['start_time']);
 
-  getMyRequests(){
+      // Combine date and time for comparison
+      DateTime rideDateTime = DateTime(
+        rideDate.year,
+        rideDate.month,
+        rideDate.day,
+        startTime.hour,
+        startTime.minute,
+      );
 
+      // Filter rides that occur within 30 minutes before and 3 hours after the current date and time
+      return driverId.contains(FirebaseAuth.instance.currentUser!.uid) &&
+          rideDateTime.isAfter(previous30Minutes) &&
+          rideDateTime.isBefore(next3Hours) &&
+          status != 'Cancelled' && status != 'Ended';
+    }).toList();
+
+    // Assign filtered rides to currentRide array
+    driverCurrentRide.assignAll(tempArray);
+  }
+
+
+  /// this method get all rides with still active date and arrange them from the nearest date to the furthest for driver
+  getUpcomingRidesForDriver() {
+    DateTime currentDate = DateTime.now();
+    DateTime next5Hours = currentDate
+        .add(Duration(hours: 5)); // Get the next 5 hours from the current date
+
+    List tempArray = ridesICreated.where((ride) {
+      String driverId = ride['driver'];
+      String status = ride['status'];
+      DateTime rideDate = DateFormat('dd-MM-yyyy').parse(ride['date']);
+      DateTime startTime = DateFormat('hh:mm a').parse(ride['start_time']);
+
+      // Combine date and time for comparison
+      DateTime rideDateTime = DateTime(
+        rideDate.year,
+        rideDate.month,
+        rideDate.day,
+        startTime.hour,
+        startTime.minute,
+      );
+
+      // Filter rides that occur after the next 5 hours from the current date
+      return driverId.contains(FirebaseAuth.instance.currentUser!.uid) &&
+          rideDateTime.isAfter(next5Hours) &&
+          status != 'Cancelled' && status != 'Ended';
+    }).toList();
+
+    // Sort rides by nearest date and time
+    tempArray.sort((a, b) {
+      DateTime rideDateTimeA = DateFormat('dd-MM-yyyy hh:mm a')
+          .parse(a['date'] + ' ' + a['start_time']);
+      DateTime rideDateTimeB = DateFormat('dd-MM-yyyy hh:mm a')
+          .parse(b['date'] + ' ' + b['start_time']);
+      return rideDateTimeA.compareTo(rideDateTimeB);
+    });
+
+    // Assign sorted rides to activeRides array
+    upcomingRidesForDriver.assignAll(tempArray);
+  }
+
+  /// this method get all rides that was ended or cancelled by driver and arrange them from the nearest date to the furthest for driver
+  getRideHistoryForDriver() {
+    DateTime currentDate = DateTime.now();
+
+    List tempArray = ridesIEnded.where((ride) {
+      String driverId = ride['driver'];
+      DateTime rideDate = DateFormat('dd-MM-yyyy').parse(ride['date']);
+      DateTime startTime = DateFormat('hh:mm a').parse(ride['start_time']);
+
+      // Combine date and time for comparison
+      DateTime rideDateTime = DateTime(
+        rideDate.year,
+        rideDate.month,
+        rideDate.day,
+        startTime.hour,
+        startTime.minute,
+      );
+
+      // Filter rides that have already occurred
+      return driverId.contains(FirebaseAuth.instance.currentUser!.uid);
+    }).toList();
+
+    // Concatenate the canceled rides to the temporary array
+    tempArray.addAll(ridesICancelled);
+
+    // Sort rides by nearest date and time
+    tempArray.sort((a, b) {
+      DateTime rideDateTimeA = DateFormat('dd-MM-yyyy hh:mm a')
+          .parse(a['date'] + ' ' + a['start_time']);
+      DateTime rideDateTimeB = DateFormat('dd-MM-yyyy hh:mm a')
+          .parse(b['date'] + ' ' + b['start_time']);
+      return rideDateTimeA.compareTo(rideDateTimeB);
+    });
+
+    // Assign sorted rides to endedRides array
+    driverHistory.assignAll(tempArray);
+  }
+
+
+  /// this method gets the current ride for the user
+  getOngoingRideForUser() { //TODO change to accepted array
+    List tempArray = ridesIJoined.where((ride) {
+      List<dynamic> joinedUsers = ride['joined'];
+      String status = ride['status'];
+
+      return joinedUsers.contains(FirebaseAuth.instance.currentUser!.uid) && status == 'Started';
+    }).toList();
+
+    // Assign filtered rides to currentRide array
+    userCurrentRide.assignAll(tempArray);
+  }
+
+  /// this method get all rides with still active date and arrange them from the nearest date to the furthest for user
+  getUpcomingRidesForUser() {
+    DateTime currentDate = DateTime.now();
+    DateTime next4Hours = currentDate.add(Duration(hours: 4));
+
+    List tempArray = ridesIJoined.where((ride) {
+      List<dynamic> joinedUsers = ride['joined'];
+      String status = ride['status'];
+      DateTime rideDate = DateFormat('dd-MM-yyyy').parse(ride['date']);
+      DateTime startTime = DateFormat('hh:mm a').parse(ride['start_time']);
+
+      // Combine date and time for comparison
+      DateTime rideDateTime = DateTime(
+        rideDate.year,
+        rideDate.month,
+        rideDate.day,
+        startTime.hour,
+        startTime.minute,
+      );
+
+      // Filter rides that occur within the next 4 hours and have the user in the joined list
+      return joinedUsers.contains(FirebaseAuth.instance.currentUser!.uid) &&
+          rideDateTime.isAfter(next4Hours) &&
+          status == 'Upcoming';
+    }).toList();
+    
+    // Sort rides by nearest date and time
+    tempArray.sort((a, b) {
+      DateTime rideDateTimeA = DateFormat('dd-MM-yyyy hh:mm a')
+          .parse(a['date'] + ' ' + a['start_time']);
+      DateTime rideDateTimeB = DateFormat('dd-MM-yyyy hh:mm a')
+          .parse(b['date'] + ' ' + b['start_time']);
+      return rideDateTimeA.compareTo(rideDateTimeB);
+    });
+
+    // Assign filtered rides to upcomingRides array
+    upcomingRidesForUser.assignAll(tempArray);
+  }
+
+  /// this method get all rides that was ended or cancelled by driver and arrange them from the nearest date to the furthest for user
+  getRideHistoryForUser() {
+    DateTime currentDate = DateTime.now();
+
+    List tempArray = ridesIJoined.where((ride) {
+      List<dynamic> joinedUsers = ride['joined'];
+      String status = ride['status'];
+      DateTime rideDate = DateFormat('dd-MM-yyyy').parse(ride['date']);
+      DateTime startTime = DateFormat('hh:mm a').parse(ride['start_time']);
+
+      // Combine date and time for comparison
+      DateTime rideDateTime = DateTime(
+        rideDate.year,
+        rideDate.month,
+        rideDate.day,
+        startTime.hour,
+        startTime.minute,
+      );
+
+      // Filter rides that have already occurred
+      return joinedUsers.contains(FirebaseAuth.instance.currentUser!.uid) && (status == 'Ended' || status == 'Cancelled' || rideDateTime.isBefore(currentDate));
+    }).toList();
+
+    // Sort rides by nearest date and time
+    tempArray.sort((a, b) {
+      DateTime rideDateTimeA = DateFormat('dd-MM-yyyy hh:mm a')
+          .parse(a['date'] + ' ' + a['start_time']);
+      DateTime rideDateTimeB = DateFormat('dd-MM-yyyy hh:mm a')
+          .parse(b['date'] + ' ' + b['start_time']);
+      return rideDateTimeA.compareTo(rideDateTimeB);
+    });
+
+    // Assign sorted rides to endedRides array
+    userHistory.assignAll(tempArray);
+  }
+
+  /// this method gets all cancelled rides by driver
+  getRidesICancelled() {
+    ridesICancelled.assignAll(allRides.where((e) {
+      String driverId = e.get('driver');
+      String status = e.get('status');
+
+      return driverId.contains(FirebaseAuth.instance.currentUser!.uid) &&
+          status == 'Cancelled';
+    }).toList());
+  }
+
+  /// this method gets all rides a user joined
+  getRidesIJoined() {
+    ridesIJoined.assignAll(allRides.where((e) {
+      List joinedIds = e.get('joined');
+
+      return joinedIds.contains(FirebaseAuth.instance.currentUser!.uid);
+    }).toList());
+  }
+
+  /// this method gets all rides that a driver has ended after making it
+  getRidesIEnded() {
+    ridesIEnded.assignAll(allRides.where((e) {
+      String driverId = e.get('driver');
+      String status = e.get('status');
+
+      return driverId.contains(FirebaseAuth.instance.currentUser!.uid) &&
+          status == 'Ended';
+    }).toList());
+  }
+
+  /// this method to get all requests sent to driver by the users to join his rides
+  getMyRequests() {
     isRequestLoading(true);
-    FirebaseFirestore.instance.collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid).collection('requests')
-        .snapshots().listen((event) {
-        myRequests.value = event.docs;
-        isRequestLoading(false);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('requests')
+        .snapshots()
+        .listen((event) {
+      myRequests.value = event.docs;
+      isRequestLoading(false);
     });
+  }
 
- }
-
- getPendingRequests(){
-
-   pendingRequests.assignAll( myRequests.where((e){
-
-     String status = e.get('status');
-
-     return status=='Pending';
-
-
-   }).toList());
-
- }
-
-  getAcceptedRequests(){
-
-    acceptedRequests.assignAll( myRequests.where((e){
-
+  /// this method gets all pending requests that the driver is yet to accept or reject
+  getPendingRequests() {
+    pendingRequests.assignAll(myRequests.where((e) {
       String status = e.get('status');
 
-      return status=='Accepted';
-
+      return status == 'Pending';
     }).toList());
-
   }
 
-
-  getRejectedRequests(){
-
-    rejectedRequests.assignAll( myRequests.where((e){
-
+  /// this method gets all requests accepted by the driver
+  getAcceptedRequests() {
+    acceptedRequests.assignAll(myRequests.where((e) {
       String status = e.get('status');
 
-      return status=='Rejected';
-
+      return status == 'Accepted';
     }).toList());
-
   }
 
+  /// this method gets all requests rejected by the driver
+  getRejectedRequests() {
+    rejectedRequests.assignAll(myRequests.where((e) {
+      String status = e.get('status');
 
-
- acceptRequest(DocumentSnapshot ride , DocumentSnapshot? request) async{
-
-
-   String driverId = ride.get('driver');
-   String userId = request!.get('user_id');
-   String requestId = request!.id;
-   int seat = 0;
-   String maxSeats = "";
-
-   List seatInformation = [];
-   try{
-
-     seatInformation = ride.get('max_seats').toString().split(' ');
-     seat = int.parse(seatInformation[0]) - 1;
-     maxSeats = seat == 1 ? '$seat seat' : '$seat seats';
-
-   }catch(e){
-     print('exception');
-     seatInformation = [];
-   }
-
-
-   await FirebaseFirestore.instance.collection('rides').doc(ride.id).set({
-     'pending': FieldValue.arrayRemove([userId]),
-     'joined': FieldValue.arrayUnion([userId]),
-     'max_seats': maxSeats,
-
-   },SetOptions(merge: true)).then((value) async {
-
-     await FirebaseFirestore.instance
-         .collection('users')
-         .doc(driverId)
-         .collection('requests')
-         .doc(requestId).set({
-
-          'status': 'Accepted'
-
-     },SetOptions(merge: true)).then((value) {
-
-
-       Get.snackbar('Success', 'Your request was accepted successfully.',
-           colorText: Colors.white,backgroundColor: AppColors.greenColor);
-
-
-       isRequestLoading(false);
-
-
-
-     });
-
-   });
-
- }
-
-  rejectRequest(DocumentSnapshot ride , DocumentSnapshot? request) async{
-
-
-    String driverId = ride.get('driver');
-    String userId = request!.get('user_id');
-    String requestId = request!.id;
-
-    await FirebaseFirestore.instance.collection('rides').doc(ride.id).set({
-      'pending': FieldValue.arrayRemove([userId]),
-      'rejected': FieldValue.arrayUnion([userId]),
-
-    },SetOptions(merge: true)).then((value) {
-
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(driverId)
-          .collection('requests')
-          .doc(requestId).set({
-
-        'status': 'Rejected'
-
-      },SetOptions(merge: true)).then((value) {
-
-        Get.snackbar('Success', 'Your request was rejected successfully.',
-            colorText: Colors.white,backgroundColor: AppColors.greenColor);
-
-        isRequestLoading(false);
-
-      });
-
-    });
-
+      return status == 'Rejected';
+    }).toList());
   }
-
-
-
-
-
-
-
-
-
-
-
 }
-

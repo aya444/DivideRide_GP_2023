@@ -1,72 +1,79 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/controller/ride_controller.dart';
-import 'package:divide_ride/widgets/rides_cards.dart';
 import 'package:divide_ride/widgets/text_widget.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 
-import '../models/driver_model/driver_model.dart';
+import '../shared preferences/shared_pref.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_constants.dart';
 import '../views/ride_details_before_database.dart';
 
 class RideBox extends StatefulWidget {
-
   final DocumentSnapshot ride;
   final DocumentSnapshot driver;
   final bool showCarDetails;
   final bool showOptions;
   final bool shouldNavigate;
+  final bool showStartOption;
   DocumentSnapshot? request;
 
-  RideBox({super.key, required this.ride , required this.driver , required this.showCarDetails , this.showOptions = false , this.shouldNavigate=false , this.request});
+  RideBox(
+      {super.key,
+      required this.ride,
+      required this.driver,
+      required this.showCarDetails,
+      this.showOptions = false,
+      this.shouldNavigate = false,
+      this.request,
+      this.showStartOption = false});
 
   @override
   State<RideBox> createState() => _RideBoxState();
 }
 
 class _RideBoxState extends State<RideBox> {
-
   RideController rideController = Get.find<RideController>();
+  bool isDriver = false;
+
+  @override
+  void initState() {
+    isDriver = CacheHelper.getData(key: AppConstants.decisionKey) ?? false;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-
-
     String userId = widget.driver.id;
 
     List dateInformation = [];
-    try{
+    try {
       dateInformation = widget.ride.get('date').toString().split('-');
-    }catch(e){
+    } catch (e) {
       dateInformation = [];
     }
 
-
-
-
     return InkWell(
       onTap: () {
-        if(widget.showCarDetails == false){
-          if(widget.showOptions == true || widget.shouldNavigate == false){
-
+        if (widget.showCarDetails == false) {
+          if (widget.showOptions == true ||
+              widget.shouldNavigate == false ||
+              widget.showStartOption == true) {
+          } else {
+            Get.to(() => RideDetailsBeforeDatabase(widget.ride, widget.driver));
           }
-          else{
-            Get.to(()=> RideDetailsBeforeDatabase(widget.ride , widget.driver));
-          }
-
         }
       },
       child: Container(
         width: double.maxFinite,
-        height: widget.showCarDetails || widget.showOptions ? 260 : 215,
+        height: widget.showCarDetails ||
+                widget.showOptions ||
+                widget.showStartOption
+            ? 260
+            : 215,
         padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
         decoration: BoxDecoration(
-
           color: AppColors.whiteColor,
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
@@ -86,7 +93,7 @@ class _RideBoxState extends State<RideBox> {
               contentPadding: EdgeInsets.zero,
               horizontalTitleGap: 10,
               leading: CircleAvatar(
-                radius:25,
+                radius: 25,
                 backgroundImage: NetworkImage(
                   widget.driver.get('image')!,
                   // width: 45,
@@ -94,33 +101,30 @@ class _RideBoxState extends State<RideBox> {
                 ),
               ),
               title: Text(
-              '${widget.driver.get('name')}', //DriverDoc!.get('driver_name')
-              overflow: TextOverflow.ellipsis,
+                '${widget.driver.get('name')}', //DriverDoc!.get('driver_name')
+                overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
                 ),
-
               ),
-              subtitle: Row(
-                  children: [
-                    Icon(
-                      Ionicons.star,
-                      color: Colors.yellow[700],
-                      size: 18,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 4, right: 6),
-                      child: Text(
-                        "4.0",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const Text("(195 Review)"),
-                  ]
-              ),
+              subtitle: Row(children: [
+                Icon(
+                  Ionicons.star,
+                  color: Colors.yellow[700],
+                  size: 18,
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(left: 4, right: 6),
+                  child: Text(
+                    "4.0",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const Text("(195 Review)"),
+              ]),
               // trailing: Container(
               //   width: 29,
               //   height: 29,
@@ -133,9 +137,7 @@ class _RideBoxState extends State<RideBox> {
               //   child: Image.asset('assets/bi_x-lg.png'),
               // ),
             ),
-
             const SizedBox(height: 2),
-
             Row(
               children: [
                 Column(
@@ -149,7 +151,9 @@ class _RideBoxState extends State<RideBox> {
                           size: 20,
                         ),
                         ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 1.6),
+                          constraints: BoxConstraints(
+                              maxWidth:
+                                  MediaQuery.of(context).size.width / 1.6),
                           child: SizedBox(
                             width: double.maxFinite,
                             child: Text(
@@ -175,10 +179,12 @@ class _RideBoxState extends State<RideBox> {
                         Icon(
                           Ionicons.location_outline,
                           size: 20,
-                          color: Colors.red,//Theme.of(context).primaryColor,
+                          color: Colors.red, //Theme.of(context).primaryColor,
                         ),
                         ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 1.6),
+                          constraints: BoxConstraints(
+                              maxWidth:
+                                  MediaQuery.of(context).size.width / 1.6),
                           child: SizedBox(
                             width: double.maxFinite,
                             child: Text(
@@ -196,14 +202,12 @@ class _RideBoxState extends State<RideBox> {
                         )
                       ],
                     ),
-
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 15),
             Row(
-
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -241,13 +245,10 @@ class _RideBoxState extends State<RideBox> {
                           color: Colors.white,
                         ),
                       ),
-
-
                     ],
                   ),
                 ),
-
-                if(!widget.showCarDetails)... [
+                if (!widget.showCarDetails) ...[
                   Spacer(),
                   myText(
                     text: '${widget.ride.get('price_per_seat')} EGP',
@@ -257,213 +258,334 @@ class _RideBoxState extends State<RideBox> {
                       color: AppColors.black,
                     ),
                   ),
-
                 ]
-
               ],
-
             ),
-
-            if(widget.showOptions)...[
-
+            if (widget.showOptions) ...[
               const SizedBox(height: 10),
-
               Obx(() => rideController.isRequestLoading.value
-              ? Center(
-              child: CircularProgressIndicator(),
-              ) :
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        Get.defaultDialog(
-                          title: "Are you sure to accept this request ?",
-                          content: Container(),
-                          //barrierDismissible: false,
-                          actions: [
-                            MaterialButton(
-                              onPressed: () {
+                  ? Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              Get.defaultDialog(
+                                title: "Are you sure to accept this request ?",
+                                content: Container(),
+                                //barrierDismissible: false,
+                                actions: [
+                                  MaterialButton(
+                                    onPressed: () {
+                                      Get.back();
 
-                                Get.back();
+                                      rideController.isRequestLoading(true);
+                                      rideController.acceptRequest(
+                                          widget.ride, widget.request);
 
-                                rideController.isRequestLoading(true);
-                                rideController.acceptRequest(
-                                    widget.ride, widget.request);
-
-                                Get.back();
-
-                                },
-                              child: textWidget(
-                                text: 'Confirm',
-                                color: Colors.white,
+                                      Get.back();
+                                    },
+                                    child: textWidget(
+                                      text: 'Confirm',
+                                      color: Colors.white,
+                                    ),
+                                    color: AppColors.greenColor,
+                                    shape: StadiumBorder(),
+                                  ),
+                                  SizedBox(width: 7),
+                                  MaterialButton(
+                                    onPressed: () {
+                                      Get.back();
+                                    },
+                                    child: textWidget(
+                                      text: 'Cancel',
+                                      color: Colors.white,
+                                    ),
+                                    color: Colors.red,
+                                    shape: StadiumBorder(),
+                                  ),
+                                ],
+                              );
+                            },
+                            child: Container(
+                              //width: 200,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 8.0,
                               ),
-                              color: AppColors.greenColor,
-                              shape: StadiumBorder(),
-                            ),
-                            SizedBox(width: 7),
-                            MaterialButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              child: textWidget(
-                                text: 'Cancel',
-                                color: Colors.white,
+                              decoration: BoxDecoration(
+                                  color: AppColors.greenColor,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Center(
+                                child: Text(
+                                  "Accept",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                  ),
+                                ),
                               ),
-                              color: Colors.red,
-                              shape: StadiumBorder(),
-                            ),
-                          ],
-                        );
-                      },
-                      child: Container(
-                        //width: 200,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 6,
-                          horizontal: 8.0,
-                        ),
-                        decoration: BoxDecoration(
-                            color: AppColors.greenColor,
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Center(
-                          child: Text(
-                            "Accept",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: (){
-                        Get.defaultDialog(
-                          title: "Are you sure to reject this request ?",
-                          content: Container(),
-                          //barrierDismissible: false,
-                          actions: [
-                            MaterialButton(
-                              onPressed: () {
-                                Get.back();
-
-                                rideController.isRequestLoading(true);
-                                rideController.rejectRequest(
-                                    widget.ride, widget.request);
-
-                                Get.back();
-                              },
-                              child: textWidget(
-                                text: 'Confirm',
-                                color: Colors.white,
-                              ),
-                              color: AppColors.greenColor,
-                              shape: StadiumBorder(),
-                            ),
-                            SizedBox(width: 7),
-                            MaterialButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              child: textWidget(
-                                text: 'Cancel',
-                                color: Colors.white,
-                              ),
-                              color: Colors.red,
-                              shape: StadiumBorder(),
-                            ),
-                          ],
-                        );
-                      },
-                      child: Container(
-                        //width: 200,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 6,
-                          horizontal: 8.0,
+                        SizedBox(
+                          width: 10,
                         ),
-                        decoration: BoxDecoration(
-                            color: Colors.red.shade700,
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Center(
-                          child: Text(
-                            "Reject",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              Get.defaultDialog(
+                                title: "Are you sure to reject this request ?",
+                                content: Container(),
+                                //barrierDismissible: false,
+                                actions: [
+                                  MaterialButton(
+                                    onPressed: () {
+                                      Get.back();
+
+                                      rideController.isRequestLoading(true);
+                                      rideController.rejectRequest(
+                                          widget.ride, widget.request);
+
+                                      Get.back();
+                                    },
+                                    child: textWidget(
+                                      text: 'Confirm',
+                                      color: Colors.white,
+                                    ),
+                                    color: AppColors.greenColor,
+                                    shape: StadiumBorder(),
+                                  ),
+                                  SizedBox(width: 7),
+                                  MaterialButton(
+                                    onPressed: () {
+                                      Get.back();
+                                    },
+                                    child: textWidget(
+                                      text: 'Cancel',
+                                      color: Colors.white,
+                                    ),
+                                    color: Colors.red,
+                                    shape: StadiumBorder(),
+                                  ),
+                                ],
+                              );
+                            },
+                            child: Container(
+                              //width: 200,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 8.0,
+                              ),
+                              decoration: BoxDecoration(
+                                  color: Colors.red.shade700,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Center(
+                                child: Text(
+                                  "Reject",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-
-              )
-
+                      ],
+                    ))
             ],
-
-            if(widget.showCarDetails)...[
-
+            if (widget.showStartOption && isDriver) ...[
               const SizedBox(height: 10),
+              Obx(
+                () => rideController.isRidesLoading.value
+                    ? Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () async {
+                                // Check if the 'joined' field exists and has a length >= 1
+                                final joinedArrayLength = await rideController
+                                    .getJoinedArrayLength(widget.ride.id);
+                                if (joinedArrayLength >= 1) {
+                                  Get.defaultDialog(
+                                    title: "Are you want to start the ride?",
+                                    content: Container(),
+                                    actions: [
+                                      MaterialButton(
+                                        onPressed: () {
+                                          Get.back();
 
+                                          rideController.isRidesLoading(true);
+                                          rideController
+                                              .startRide(widget.ride.id);
+                                          Get.to(() =>
+                                              RideDetailsBeforeDatabase(
+                                                  widget.ride, widget.driver));
+                                        },
+                                        child: textWidget(
+                                          text: 'Confirm',
+                                          color: Colors.white,
+                                        ),
+                                        color: AppColors.greenColor,
+                                        shape: StadiumBorder(),
+                                      ),
+                                      SizedBox(width: 7),
+                                      MaterialButton(
+                                        onPressed: () {
+                                          Get.back(); //TODO add user detail page here
+                                        },
+                                        child: textWidget(
+                                          text: 'Cancel',
+                                          color: Colors.white,
+                                        ),
+                                        color: Colors.red,
+                                        shape: StadiumBorder(),
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  Get.snackbar(
+                                    'FAILED TO START THE RIDE!',
+                                    'No one joined the ride, you need to have at least one passenger with you!',
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.red,
+                                  );
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                  horizontal: 8.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.greenColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "Start",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
+            if (widget.showStartOption && !isDriver) ...[
+              const SizedBox(height: 13),
+              Obx(
+                () => rideController.isRidesLoading.value
+                    ? Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                // Handle phone icon press event here
+                                // TODO: Add your desired functionality
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                  horizontal: 8.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Welcome Aboard!",
+                                      style: TextStyle(
+                                        color: AppColors.greenColor,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Icon(
+                                      Icons.phone,
+                                      color: AppColors.greenColor,
+                                      size: 24,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
+            if (widget.showCarDetails) ...[
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Container(
                     //width: 200,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 6,
-                    horizontal: 8.0,
-                  ),
-                  decoration: BoxDecoration(
-                      color: AppColors.blue,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Ionicons.car_sport,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 6, right: 8),
-                        child: Text(
-                          '${widget.driver.get('Vehicle_make')} ${widget.driver.get('Vehicle_model')}',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(right: 8),
-                        child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 8.0,
+                    ),
+                    decoration: BoxDecoration(
+                        color: AppColors.blue,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Ionicons.car_sport,
+                          size: 18,
                           color: Colors.white,
-                          child: SizedBox(
-                            width: 2,
-                            height: 16,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 6, right: 8),
+                          child: Text(
+                            '${widget.driver.get('Vehicle_make')} ${widget.driver.get('Vehicle_model')}',
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
-                      ),
-                      Text(
-                        '${widget.driver.get('Vehicle_color')}',
-                        style: TextStyle(
-                          color: Colors.white,
+                        Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: Container(
+                            color: Colors.white,
+                            child: SizedBox(
+                              width: 2,
+                              height: 16,
+                            ),
+                          ),
                         ),
-                      ),
-
-                    ],
+                        Text(
+                          '${widget.driver.get('Vehicle_color')}',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-            ),
                 ],
               )
-
             ]
-
           ],
         ),
       ),

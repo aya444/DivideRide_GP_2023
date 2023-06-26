@@ -5,32 +5,27 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class HistoryRidesForDriver extends StatefulWidget {
-  const HistoryRidesForDriver({Key? key}) : super(key: key);
+class OngoingRideForDriver extends StatefulWidget {
+  const OngoingRideForDriver({Key? key}) : super(key: key);
 
   @override
-  State<HistoryRidesForDriver> createState() => _HistoryRidesForDriverState();
+  State<OngoingRideForDriver> createState() => _OngoingRideForDriverState();
 }
 
-class _HistoryRidesForDriverState extends State<HistoryRidesForDriver> {
+class _OngoingRideForDriverState extends State<OngoingRideForDriver> {
   RideController rideController = Get.find<RideController>();
 
   @override
   void initState() {
     super.initState();
 
-    print(
-        'length of ridesICancelled = ${rideController.ridesICancelled.length}');
-    print('length of ridesIEnded = ${rideController.ridesIEnded.length}');
-    print('length of driverHistory = ${rideController.driverHistory.length}');
     print('length of allRides = ${rideController.allRides.length}');
     print('length of allUsers = ${rideController.allUsers.length}');
+    print(
+        'length of currentRides = ${rideController.driverCurrentRide.length}');
     print("driver Id = ${FirebaseAuth.instance.currentUser!.uid} ");
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      rideController.getRidesICancelled();
-      rideController.getRidesIEnded();
-      rideController.getRideHistoryForDriver();
+      rideController.getOngoingRideForDriver();
       rideController.getMyDocument();
     });
   }
@@ -43,15 +38,16 @@ class _HistoryRidesForDriverState extends State<HistoryRidesForDriver> {
             DocumentSnapshot driver = rideController.myDocument!;
 
             return Padding(
-                padding: EdgeInsets.symmetric(vertical: 13, horizontal: 2),
+                padding: EdgeInsets.symmetric(vertical: 13),
                 child: RideBox(
-                  ride: rideController.driverHistory[index],
+                  ride: rideController.driverCurrentRide[index],
                   driver: driver,
                   showCarDetails: false,
                   shouldNavigate: true,
+                  showStartOption: true,
                 ));
           },
-          itemCount: rideController.driverHistory.length,
+          itemCount: rideController.driverCurrentRide.length,
         ));
   }
 }

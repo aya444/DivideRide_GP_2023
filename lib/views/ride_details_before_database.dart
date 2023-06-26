@@ -5,13 +5,12 @@ import 'package:divide_ride/utils/app_constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../controller/ride_controller.dart';
 import '../widgets/ride_box.dart';
 import '../widgets/text_widget.dart';
-import '../widgets/upcoming_rides_for_user.dart';
 
 class RideDetailsBeforeDatabase extends StatefulWidget {
-
   DocumentSnapshot ride;
   DocumentSnapshot driver;
   RideDetailsBeforeDatabase(this.ride, this.driver);
@@ -26,12 +25,10 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
 
   bool isDriver = false;
 
-
-
-
   @override
   void initState() {
     super.initState();
+    rideController.isRidesLoading(true);
 
     isDriver = CacheHelper.getData(key: AppConstants.decisionKey) ?? false;
 
@@ -43,6 +40,9 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
     RideController rideController = Get.find<RideController>();
 
     String userId = FirebaseAuth.instance.currentUser!.uid;
+    DateTime rideDate = DateFormat('dd-MM-yyyy').parse(widget.ride.get('date'));
+    DateTime startTime =
+        DateFormat('hh:mm a').parse(widget.ride.get('start_time'));
 
     //String rideId = widget.ride.id;
 
@@ -64,7 +64,6 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
       joinedUsers = [];
     }
 
-
     List rejectedUsers = [];
 
     try {
@@ -73,9 +72,11 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
       rejectedUsers = [];
     }
 
-
-
-
+    try {
+      rejectedUsers = widget.ride.get('rejected');
+    } catch (e) {
+      rejectedUsers = [];
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -84,7 +85,7 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
         centerTitle: true,
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         child: Column(
           children: [
             RideBox(
@@ -149,209 +150,257 @@ class _RideDetailsBeforeDatabaseState extends State<RideDetailsBeforeDatabase> {
             ),
             // Spacer(),
             if (isDriver) ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {},
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(13),
-                            color: AppColors.greenColor.withOpacity(0.9)),
-                        child: Center(
-                          child: Text(
-                            "Cancel Ride",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {},
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.4),
-                                spreadRadius: 0.1,
-                                blurRadius: 60,
-                                offset:
-                                    Offset(0, 1), // changes position of shadow
+              if (widget.ride.get('status') == 'Started') ...[
+                /// EL MOSHKELA HENAAAAAA Low 3aiz tegarab zorar el end fa 5aliha hena widget.ride.get('status') == 'Upcoming'
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          Get.back();
+                          rideController.endRide(widget.ride.id);
+                          // rideController.isRidesLoading(true);
+                          Get.back();
+                        },
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(13),
+                              color: Colors.red.withOpacity(0.9)),
+                          child: Center(
+                            child: Text(
+                              "End Ride",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
                               ),
-                            ],
-                            borderRadius: BorderRadius.circular(13)),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        child: Center(
-                          child: Text(
-                            'Edit Ride',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ] else if (widget.ride.get('status') == 'Ended' ||
+                  widget.ride.get('status') == 'Cancelled')
+                ...[]
+              else ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          rideController.cancelRide(widget.ride.id);
+                        },
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(13),
+                              color: AppColors.greenColor.withOpacity(0.9)),
+                          child: Center(
+                            child: Text(
+                              "Cancel Ride",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {},
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.4),
+                                  spreadRadius: 0.1,
+                                  blurRadius: 60,
+                                  offset: Offset(
+                                      0, 1), // changes position of shadow
+                                ),
+                              ],
+                              borderRadius: BorderRadius.circular(13)),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          child: Center(
+                            child: Text(
+                              'Edit Ride',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ]
             ] else ...[
               Row(
                 children: [
-                  Obx(() => rideController.isRequestLoading.value ? Center(child: CircularProgressIndicator(),) :
-
-
-                    pendingUsers.contains(userId) ? Expanded(
-                    child: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(13),
-                          color: AppColors.yellow.withOpacity(0.9)
-                      ),
-                      child: Center(
-                          child: Text(
-                            "Pending",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                            ),
+                  Obx(
+                    () => rideController.isRequestLoading.value
+                        ? Center(
+                            child: CircularProgressIndicator(),
                           )
-                      ),
-                    ),
-                  ) : joinedUsers.contains(userId) ?
-                    Expanded(
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(13),
-                            color: AppColors.greenColor.withOpacity(0.9)
-                        ),
-                        child: Center(
-                            child: Text(
-                              "Joined",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                              ),
-                            )
-                        ),
-                      ),
-                    ) : rejectedUsers.contains(userId) ?
-                    Expanded(
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(13),
-                            color: Colors.red.shade700,
-                        ),
-                        child: Center(
-                            child: Text(
-                              "Rejected",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                              ),
-                            )
-                        ),
-                      ),
-                    ) : maxSeats=="0 seats" ?
-                    Expanded(
-                      child: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(13),
-                      color: AppColors.greenColor,
-                      ),
-                      child: Center(
-                      child: Text(
-                      "No Seats Available",
-                      style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                      ),
-                      )
-                      ),
-                      ),
-                      )
-
-
-                    : Expanded(
-                      child: InkWell(onTap: () {
-                            Get.defaultDialog(
-                              title: "Are you sure to join this ride ?",
-                              content: Container(),
-                              //barrierDismissible: false,
-                              actions: [
-                                MaterialButton(
-                                  onPressed: () {
-
-                                    Get.back();
-
-                                    rideController.isRequestLoading(true);
-                                    rideController.requestToJoinRide(
-                                        widget.ride, userId);
-
-                                    Get.back();
-
-                                  },
-                                  child: textWidget(
-                                    text: 'Confirm',
-                                    color: Colors.white,
-                                  ),
-                                  color: AppColors.greenColor,
-                                  shape: StadiumBorder(),
+                        : pendingUsers.contains(userId)
+                            ? Expanded(
+                                child: Container(
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(13),
+                                      color: AppColors.yellow.withOpacity(0.9)),
+                                  child: Center(
+                                      child: Text(
+                                    "Pending",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                    ),
+                                  )),
                                 ),
-                                SizedBox(width: 7),
-                                MaterialButton(
-                                  onPressed: () {
-                                    Get.back();
-                                  },
-                                  child: textWidget(
-                                    text: 'Cancel',
-                                    color: Colors.white,
-                                  ),
-                                  color: Colors.red,
-                                  shape: StadiumBorder(),
-                                ),
-                              ],
-                            );
-                          }, child: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(13),
-                                color: AppColors.greenColor.withOpacity(0.9)
-                            ),
-                            child: Center(
-                                child: Text(
-                                  "Send Request",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                  ),
-                                )
-                            ),
-                          )),),
+                              )
+                            : joinedUsers.contains(userId)
+                                ? Expanded(
+                                    child: Container(
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(13),
+                                          color: AppColors.greenColor
+                                              .withOpacity(0.9)),
+                                      child: Center(
+                                          child: Text(
+                                        "Joined",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 16,
+                                        ),
+                                      )),
+                                    ),
+                                  )
+                                : rejectedUsers.contains(userId)
+                                    ? Expanded(
+                                        child: Container(
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(13),
+                                            color: Colors.red.shade700,
+                                          ),
+                                          child: Center(
+                                              child: Text(
+                                            "Rejected",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 16,
+                                            ),
+                                          )),
+                                        ),
+                                      )
+                                    : maxSeats == "0 seats"
+                                        ? Expanded(
+                                            child: Container(
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(13),
+                                                color: AppColors.greenColor,
+                                              ),
+                                              child: Center(
+                                                  child: Text(
+                                                "No Seats Available",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16,
+                                                ),
+                                              )),
+                                            ),
+                                          )
+                                        : Expanded(
+                                            child: InkWell(
+                                                onTap: () {
+                                                  Get.defaultDialog(
+                                                    title:
+                                                        "Are you sure to join this ride ?",
+                                                    content: Container(),
+                                                    //barrierDismissible: false,
+                                                    actions: [
+                                                      MaterialButton(
+                                                        onPressed: () {
+                                                          Get.back();
 
+                                                          rideController
+                                                              .isRequestLoading(
+                                                                  true);
+                                                          rideController
+                                                              .requestToJoinRide(
+                                                                  widget.ride,
+                                                                  userId);
 
-
+                                                          Get.back();
+                                                        },
+                                                        child: textWidget(
+                                                          text: 'Confirm',
+                                                          color: Colors.white,
+                                                        ),
+                                                        color: AppColors
+                                                            .greenColor,
+                                                        shape: StadiumBorder(),
+                                                      ),
+                                                      SizedBox(width: 7),
+                                                      MaterialButton(
+                                                        onPressed: () {
+                                                          Get.back();
+                                                        },
+                                                        child: textWidget(
+                                                          text: 'Cancel',
+                                                          color: Colors.white,
+                                                        ),
+                                                        color: Colors.red,
+                                                        shape: StadiumBorder(),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                                child: Container(
+                                                  height: 50,
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              13),
+                                                      color: AppColors
+                                                          .greenColor
+                                                          .withOpacity(0.9)),
+                                                  child: Center(
+                                                      child: Text(
+                                                    "Send Request",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      fontSize: 16,
+                                                    ),
+                                                  )),
+                                                )),
+                                          ),
                   )
                   // SizedBox(
                   //   width: 10,

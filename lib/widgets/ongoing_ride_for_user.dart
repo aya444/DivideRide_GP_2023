@@ -5,32 +5,27 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class HistoryRidesForDriver extends StatefulWidget {
-  const HistoryRidesForDriver({Key? key}) : super(key: key);
+class OngoingRideForUser extends StatefulWidget {
+  const OngoingRideForUser({Key? key}) : super(key: key);
 
   @override
-  State<HistoryRidesForDriver> createState() => _HistoryRidesForDriverState();
+  State<OngoingRideForUser> createState() => _OngoingRideForUserState();
 }
 
-class _HistoryRidesForDriverState extends State<HistoryRidesForDriver> {
+class _OngoingRideForUserState extends State<OngoingRideForUser> {
   RideController rideController = Get.find<RideController>();
 
   @override
   void initState() {
     super.initState();
 
-    print(
-        'length of ridesICancelled = ${rideController.ridesICancelled.length}');
-    print('length of ridesIEnded = ${rideController.ridesIEnded.length}');
-    print('length of driverHistory = ${rideController.driverHistory.length}');
     print('length of allRides = ${rideController.allRides.length}');
     print('length of allUsers = ${rideController.allUsers.length}');
+    print('length of currentRides = ${rideController.userCurrentRide.length}');
     print("driver Id = ${FirebaseAuth.instance.currentUser!.uid} ");
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      rideController.getRidesICancelled();
-      rideController.getRidesIEnded();
-      rideController.getRideHistoryForDriver();
+      rideController.getRidesIJoined();
+      rideController.getOngoingRideForUser();
       rideController.getMyDocument();
     });
   }
@@ -40,18 +35,20 @@ class _HistoryRidesForDriverState extends State<HistoryRidesForDriver> {
     return Obx(() => ListView.builder(
           shrinkWrap: true,
           itemBuilder: (context, index) {
-            DocumentSnapshot driver = rideController.myDocument!;
+            DocumentSnapshot driver = rideController.allUsers.firstWhere((e) =>
+                rideController.userCurrentRide[index].get('driver') == e.id);
 
             return Padding(
-                padding: EdgeInsets.symmetric(vertical: 13, horizontal: 2),
+                padding: EdgeInsets.symmetric(vertical: 13),
                 child: RideBox(
-                  ride: rideController.driverHistory[index],
+                  ride: rideController.userCurrentRide[index],
                   driver: driver,
                   showCarDetails: false,
                   shouldNavigate: true,
+                  showStartOption: true,
                 ));
           },
-          itemCount: rideController.driverHistory.length,
+          itemCount: rideController.userCurrentRide.length,
         ));
   }
 }

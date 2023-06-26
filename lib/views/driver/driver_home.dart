@@ -530,7 +530,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
   Widget buildConfirmButton() {
     return Positioned(
-      top: 730, //170
+      top: 450, //170
       left: 20, //20
       right: 20,
       child: Obx(() => rideController.isRideUploading.value
@@ -796,11 +796,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             child: Column(
               children: [
                 buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(()=> PaymentScreen())),
-                // buildDrawerItem(title: 'Ride History', onPressed: () {}, isVisible: true),
-                //buildDrawerItem(title: 'Invite Friends', onPressed: () {}),
                 buildDrawerItem(title: 'Ride Requests', onPressed: () => Get.to(()=> const RideRequests())),
                 buildDrawerItem(title: 'My Rides', onPressed: () => Get.to(()=> const MyRides())),
-                buildDrawerItem(title: 'Promo Codes', onPressed: () {}),
                 buildDrawerItem(title: 'Settings', onPressed: () {}),
                 buildDrawerItem(title: 'Support', onPressed: () {}),
                 buildDrawerItem(title: 'Log Out', onPressed: () {
