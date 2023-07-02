@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/controller/auth_controller.dart';
@@ -179,6 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool showSourceField = false;
   bool showDateTimeFields = false;
 
+
   // Widget for destination field
   Widget buildTextField() {
     return Positioned(
@@ -252,82 +254,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // Widget buildTextFieldForSource() {
-  //   return Positioned(
-  //     top: 230, //170
-  //     left: 20, //20
-  //     right: 20, //20
-  //     child: Container(
-  //       width: Get.width,
-  //       height: 50,
-  //       padding: EdgeInsets.only(left: 15),
-  //       decoration: BoxDecoration(
-  //           color: Colors.white,
-  //           boxShadow: [
-  //             BoxShadow(
-  //                 color: Colors.black.withOpacity(0.05),
-  //                 spreadRadius: 4,
-  //                 blurRadius: 10)
-  //           ],
-  //           borderRadius: BorderRadius.circular(8)),
-  //       child: TextFormField(
-  //         controller: sourceController,
-  //         readOnly: true,
-  //         onTap: () async {
-  //           //buildSourceSheet();
-  //           Get.back();
-  //           Prediction? p =
-  //               await authController.showGoogleAutoComplete(context);
-  //
-  //           String place = p!.description!;
-  //
-  //           sourceController.text = place;
-  //
-  //           source = await authController.buildLatLngFromAddress(place);
-  //
-  //           if (markers.length >= 2) {
-  //             markers.remove(markers.last);
-  //           }
-  //           markers.add(Marker(
-  //               markerId: MarkerId(place),
-  //               infoWindow: InfoWindow(
-  //                 title: 'Source: $place',
-  //               ),
-  //               position: source));
-  //
-  //           await getPolylines(source, destination);
-  //
-  //           drawPolyline(place);
-  //
-  //           myMapController!.animateCamera(CameraUpdate.newCameraPosition(
-  //               CameraPosition(target: source, zoom: 14)));
-  //           if (mounted)
-  //             setState(() {
-  //               showDateTimeFields = true;
-  //             });
-  //         },
-  //         style: GoogleFonts.poppins(
-  //           fontSize: 16,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.black, // 0xffA7A7A7
-  //         ),
-  //         decoration: InputDecoration(
-  //           hintText: 'From: ',
-  //           hintStyle: GoogleFonts.poppins(
-  //               fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black),
-  //           suffixIcon: Padding(
-  //             padding: const EdgeInsets.only(left: 10),
-  //             child: Icon(
-  //               Icons.search,
-  //             ),
-  //           ),
-  //           border: InputBorder.none,
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   // Widget for Source field
   Widget buildTextFieldForSource() {
@@ -483,10 +409,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: CircularProgressIndicator(),
               )
             : greenButton('Search for Rides', () {
-                // if (!formKey.currentState!.validate()) {
-                //  return;
-                //   }
-                print("I am before array!");
                 Map<String, dynamic> searchRideInfo = {
                   'pickup_address': sourceController.text,
                   'destination_address': destinationController.text,
@@ -495,31 +417,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   'destination_latlng':
                       GeoPoint(destination!.latitude, destination.longitude),
                 };
-                print("I ama after array");
-                print('Search Ride Info: $searchRideInfo');
 
                 rideController.findAndArrangeRides(searchRideInfo);
-
-                print('Filtered and arranged rides:');
-                rideController.filteredAndArrangedRides.forEach((snapshot) {
-                  final data = snapshot.data() as Map<String, dynamic>?;
-
-                  if (data != null) {
-                    final pickupAddress = data['pickup_address'];
-                    final destinationAddress = data['destination_address'];
-
-                    if (pickupAddress != null && destinationAddress != null) {
-                      print('Ride ID: ${snapshot.id}');
-                      print('Pickup Address: $pickupAddress');
-                      print('Destination Address: $destinationAddress');
-                      // Add more fields as needed
-                    } else {
-                      print('Invalid ride data for Ride ID: ${snapshot.id}');
-                    }
-                  } else {
-                    print('No data available for Ride ID: ${snapshot.id}');
-                  }
-                });
 
                 resetControllers();
                 Get.to(() => NearestRidePage(
@@ -543,7 +442,6 @@ class _HomeScreenState extends State<HomeScreen> {
       height: height,
       child: ListTile(
         contentPadding: EdgeInsets.all(0),
-        // minVerticalPadding: 0,
         dense: true,
         onTap: () => onPressed(),
         title: Row(
@@ -586,51 +484,51 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 150,
               child: DrawerHeader(
                   child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: authController.myUser.value.image == null
-                            ? const DecorationImage(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: authController.myUser.value.image == null
+                                ? const DecorationImage(
                                 image: AssetImage('assets/person.png'),
                                 fit: BoxFit.fill)
-                            : DecorationImage(
+                                : DecorationImage(
                                 image: NetworkImage(
                                     authController.myUser.value.image!),
                                 fit: BoxFit.fill)),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Good Morning, ',
-                            style: GoogleFonts.poppins(
-                                color: Colors.black.withOpacity(0.28),
-                                fontSize: 14)),
-                        Text(
-                          authController.myUser.value.name == null
-                              ? "User"
-                              : authController.myUser.value.name!,
-                          style: GoogleFonts.poppins(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              )),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Good Morning, ',
+                                style: GoogleFonts.poppins(
+                                    color: Colors.black.withOpacity(0.28),
+                                    fontSize: 14)),
+                            Text(
+                              authController.myUser.value.name == null
+                                  ? "User"
+                                  : authController.myUser.value.name!,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  )),
             ),
           ),
           ),
@@ -642,13 +540,38 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(() => PaymentScreen())),
-                //buildDrawerItem(title: 'Ride History', onPressed: () {}, isVisible: true),
-                buildDrawerItem(title: 'All Rides', onPressed: () => Get.to(()=> const MyRides())),
+                Stack(children: [
+                  buildDrawerItem(title: 'All Rides', onPressed: () => Get.to(()=> const MyRides())),
+                  Obx(() => rideController.userCurrentRide.length == 1
+                      ? Positioned(
+                    top: 16,
+                    right: 0,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '1',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                      : SizedBox()
+                  ),
+                ],),
                 buildDrawerItem(title: 'Settings', onPressed: () {Get.to(() => const MyProfile());}),
                 buildDrawerItem(title: 'Support', onPressed: () {}),
                 buildDrawerItem(title: 'Log Out', onPressed: () {
-                      FirebaseAuth.instance.signOut();
-                      Get.to(() => DecisionScreen());}),
+                  FirebaseAuth.instance.signOut();
+                  Get.to(() => DecisionScreen());}),
               ],
             ),
           ),
@@ -668,20 +591,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                // buildDrawerItem(
-                //     title: 'Get food delivery',
-                //     onPressed: () {},
-                //     fontSize: 12,
-                //     fontWeight: FontWeight.w500,
-                //     color: Colors.black.withOpacity(0.15),
-                //     height: 20),
-                // buildDrawerItem(
-                //     title: 'Make money driving',
-                //     onPressed: () {},
-                //     fontSize: 12,
-                //     fontWeight: FontWeight.w500,
-                //     color: Colors.black.withOpacity(0.15),
-                //     height: 20),
                 buildDrawerItem(
                   title: 'Rate us on store',
                   onPressed: () {},
@@ -700,6 +609,143 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  // buildDrawer() {
+  //   return Drawer(
+  //     child: Column(
+  //       children: [
+  //         Obx(() => authController.myUser.value.name == null ? Center(child: CircularProgressIndicator()) :
+  //         InkWell(
+  //           onTap: () {
+  //             Get.to(() => const MyProfile());
+  //           },
+  //           child: SizedBox(
+  //             height: 150,
+  //             child: DrawerHeader(
+  //                 child: Row(
+  //               crossAxisAlignment: CrossAxisAlignment.center,
+  //               mainAxisAlignment: MainAxisAlignment.spaceAround,
+  //               children: [
+  //                 Container(
+  //                   width: 80,
+  //                   height: 80,
+  //                   decoration: BoxDecoration(
+  //                       shape: BoxShape.circle,
+  //                       image: authController.myUser.value.image == null
+  //                           ? const DecorationImage(
+  //                               image: AssetImage('assets/person.png'),
+  //                               fit: BoxFit.fill)
+  //                           : DecorationImage(
+  //                               image: NetworkImage(
+  //                                   authController.myUser.value.image!),
+  //                               fit: BoxFit.fill)),
+  //                 ),
+  //                 const SizedBox(
+  //                   width: 10,
+  //                 ),
+  //                 Expanded(
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     mainAxisAlignment: MainAxisAlignment.center,
+  //                     children: [
+  //                       Text('Good Morning, ',
+  //                           style: GoogleFonts.poppins(
+  //                               color: Colors.black.withOpacity(0.28),
+  //                               fontSize: 14)),
+  //                       Text(
+  //                         authController.myUser.value.name == null
+  //                             ? "User"
+  //                             : authController.myUser.value.name!,
+  //                         style: GoogleFonts.poppins(
+  //                             fontSize: 24,
+  //                             fontWeight: FontWeight.bold,
+  //                             color: Colors.black),
+  //                         overflow: TextOverflow.ellipsis,
+  //                         maxLines: 1,
+  //                       )
+  //                     ],
+  //                   ),
+  //                 )
+  //               ],
+  //             )),
+  //           ),
+  //         ),
+  //         ),
+  //         const SizedBox(
+  //           height: 20,
+  //         ),
+  //         Container(
+  //           padding: EdgeInsets.symmetric(horizontal: 30),
+  //           child: Column(
+  //             children: [
+  //               buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(() => PaymentScreen())),
+  //               Stack(children: [
+  //                 buildDrawerItem(title: 'All Rides', onPressed: () => Get.to(()=> const MyRides())),
+  //                 if(rideController.userCurrentRide.length == 1)
+  //                   Positioned(
+  //                     top: 8,
+  //                     right: 0,
+  //                     child: Container(
+  //                       width: 20,
+  //                       height: 20,
+  //                       decoration: BoxDecoration(
+  //                         color: Colors.green,
+  //                         shape: BoxShape.circle,
+  //                       ),
+  //                       child: Center(
+  //                         child: Text(
+  //                           '1',
+  //                           style: TextStyle(
+  //                             color: Colors.white,
+  //                             fontWeight: FontWeight.bold,
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   )
+  //               ],),
+  //               buildDrawerItem(title: 'Settings', onPressed: () {Get.to(() => const MyProfile());}),
+  //               buildDrawerItem(title: 'Support', onPressed: () {}),
+  //               buildDrawerItem(title: 'Log Out', onPressed: () {
+  //                     FirebaseAuth.instance.signOut();
+  //                     Get.to(() => DecisionScreen());}),
+  //             ],
+  //           ),
+  //         ),
+  //         Spacer(),
+  //         Divider(),
+  //         Container(
+  //           padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+  //           child: Column(
+  //             children: [
+  //               buildDrawerItem(
+  //                   title: 'Do more',
+  //                   onPressed: () {},
+  //                   fontSize: 12,
+  //                   fontWeight: FontWeight.bold,
+  //                   color: Colors.black.withOpacity(0.15),
+  //                   height: 20),
+  //               const SizedBox(
+  //                 height: 20,
+  //               ),
+  //               buildDrawerItem(
+  //                 title: 'Rate us on store',
+  //                 onPressed: () {},
+  //                 fontSize: 12,
+  //                 fontWeight: FontWeight.w500,
+  //                 color: Colors.black.withOpacity(0.15),
+  //                 height: 20,
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         const SizedBox(
+  //           height: 20,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   late Uint8List markIcons;
 

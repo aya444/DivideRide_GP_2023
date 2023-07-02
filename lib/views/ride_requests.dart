@@ -2,10 +2,7 @@ import 'package:divide_ride/utils/app_colors.dart';
 import 'package:divide_ride/views/tabs/accepted_tab.dart';
 import 'package:divide_ride/views/tabs/pending_tab.dart';
 import 'package:divide_ride/views/tabs/rejected_tab.dart';
-import 'package:divide_ride/views/tabs/upcoming_tab.dart';
 import 'package:flutter/material.dart';
-
-import 'tabs/history_tab.dart';
 
 class RideRequests extends StatelessWidget {
   const RideRequests({Key? key}) : super(key: key);

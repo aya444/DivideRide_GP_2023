@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/controller/ride_controller.dart';
+import 'package:divide_ride/views/driver/view_users.dart';
 import 'package:divide_ride/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,7 +9,7 @@ import 'package:ionicons/ionicons.dart';
 import '../shared preferences/shared_pref.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_constants.dart';
-import '../views/ride_details_before_database.dart';
+import '../views/ride_details_view.dart';
 
 class RideBox extends StatefulWidget {
   final DocumentSnapshot ride;
@@ -45,8 +46,6 @@ class _RideBoxState extends State<RideBox> {
 
   @override
   Widget build(BuildContext context) {
-    String userId = widget.driver.id;
-
     List dateInformation = [];
     try {
       dateInformation = widget.ride.get('date').toString().split('-');
@@ -61,17 +60,16 @@ class _RideBoxState extends State<RideBox> {
               widget.shouldNavigate == false ||
               widget.showStartOption == true) {
           } else {
-            Get.to(() => RideDetailsBeforeDatabase(widget.ride, widget.driver));
+            Get.to(() => RideDetailsView(widget.ride, widget.driver));
           }
         }
       },
       child: Container(
         width: double.maxFinite,
         height: widget.showCarDetails ||
-                widget.showOptions ||
-                widget.showStartOption
-            ? 260
-            : 215,
+                widget.showOptions
+            ? 278
+            : 238,
         padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
         decoration: BoxDecoration(
           color: AppColors.whiteColor,
@@ -83,8 +81,6 @@ class _RideBoxState extends State<RideBox> {
               color: Color(0xff393939).withOpacity(0.15),
             ),
           ],
-          //color: Theme.of(context).primaryColor.withOpacity(0.8),
-          //borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,8 +92,6 @@ class _RideBoxState extends State<RideBox> {
                 radius: 25,
                 backgroundImage: NetworkImage(
                   widget.driver.get('image')!,
-                  // width: 45,
-                  // fit: BoxFit.cover,
                 ),
               ),
               title: Text(
@@ -125,17 +119,6 @@ class _RideBoxState extends State<RideBox> {
                 ),
                 const Text("(195 Review)"),
               ]),
-              // trailing: Container(
-              //   width: 29,
-              //   height: 29,
-              //   padding: EdgeInsets.all(5),
-              //   decoration: BoxDecoration(
-              //     image: DecorationImage(
-              //       image: AssetImage('assets/circle.png'),
-              //     ),
-              //   ),
-              //   child: Image.asset('assets/bi_x-lg.png'),
-              // ),
             ),
             const SizedBox(height: 2),
             Row(
@@ -161,8 +144,6 @@ class _RideBoxState extends State<RideBox> {
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                //   color: AppColors.black,
-                                //   //color: Colors.black54,
                               ),
                               overflow: TextOverflow.ellipsis,
                               //maxLines: 2,
@@ -179,7 +160,7 @@ class _RideBoxState extends State<RideBox> {
                         Icon(
                           Ionicons.location_outline,
                           size: 20,
-                          color: Colors.red, //Theme.of(context).primaryColor,
+                          color: Colors.red,
                         ),
                         ConstrainedBox(
                           constraints: BoxConstraints(
@@ -192,8 +173,6 @@ class _RideBoxState extends State<RideBox> {
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                //color: AppColors.black,
-                                //color: AppColors.blue, //Theme.of(context).primaryColor,
                               ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
@@ -275,7 +254,6 @@ class _RideBoxState extends State<RideBox> {
                               Get.defaultDialog(
                                 title: "Are you sure to accept this request ?",
                                 content: Container(),
-                                //barrierDismissible: false,
                                 actions: [
                                   MaterialButton(
                                     onPressed: () {
@@ -284,6 +262,7 @@ class _RideBoxState extends State<RideBox> {
                                       rideController.isRequestLoading(true);
                                       rideController.acceptRequest(
                                           widget.ride, widget.request);
+                                      rideController.updatePendingRequests();
 
                                       Get.back();
                                     },
@@ -310,7 +289,6 @@ class _RideBoxState extends State<RideBox> {
                               );
                             },
                             child: Container(
-                              //width: 200,
                               padding: const EdgeInsets.symmetric(
                                 vertical: 6,
                                 horizontal: 8.0,
@@ -340,16 +318,14 @@ class _RideBoxState extends State<RideBox> {
                               Get.defaultDialog(
                                 title: "Are you sure to reject this request ?",
                                 content: Container(),
-                                //barrierDismissible: false,
                                 actions: [
                                   MaterialButton(
                                     onPressed: () {
                                       Get.back();
-
                                       rideController.isRequestLoading(true);
                                       rideController.rejectRequest(
                                           widget.ride, widget.request);
-
+                                      rideController.updatePendingRequests();
                                       Get.back();
                                     },
                                     child: textWidget(
@@ -375,7 +351,6 @@ class _RideBoxState extends State<RideBox> {
                               );
                             },
                             child: Container(
-                              //width: 200,
                               padding: const EdgeInsets.symmetric(
                                 vertical: 6,
                                 horizontal: 8.0,
@@ -422,13 +397,17 @@ class _RideBoxState extends State<RideBox> {
                                       MaterialButton(
                                         onPressed: () {
                                           Get.back();
-
                                           rideController.isRidesLoading(true);
                                           rideController
                                               .startRide(widget.ride.id);
-                                          Get.to(() =>
-                                              RideDetailsBeforeDatabase(
-                                                  widget.ride, widget.driver));
+                                          rideController.getAcceptedUserForRide(
+                                              widget.ride.id);
+                                          rideController
+                                              .updateOngoingDriverRide();
+                                          rideController
+                                              .updateOngoingUserRide();
+                                          Get.to(() => ViewUsers(
+                                              rideId: widget.ride.id));
                                         },
                                         child: textWidget(
                                           text: 'Confirm',
@@ -487,54 +466,18 @@ class _RideBoxState extends State<RideBox> {
               ),
             ],
             if (widget.showStartOption && !isDriver) ...[
-              const SizedBox(height: 13),
-              Obx(
-                () => rideController.isRidesLoading.value
-                    ? Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : Row(
-                        children: [
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {
-                                // Handle phone icon press event here
-                                // TODO: Add your desired functionality
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 6,
-                                  horizontal: 8.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Welcome Aboard!",
-                                      style: TextStyle(
-                                        color: AppColors.greenColor,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Icon(
-                                      Icons.phone,
-                                      color: AppColors.greenColor,
-                                      size: 24,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+              const SizedBox(height: 7),
+              Center(
+                child: Text(
+                  "Welcome Aboard!",
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.greenColor,
+                  ),
+                ),
               ),
             ],
             if (widget.showCarDetails) ...[
@@ -585,7 +528,22 @@ class _RideBoxState extends State<RideBox> {
                   ),
                 ],
               )
-            ]
+            ],
+            if (widget.ride.get('status') == "Cancelled") ...[
+              const SizedBox(height: 7),
+              Center(
+                child: Text(
+                  '${widget.ride.get('status')}', //DriverDoc!.get('driver_name')
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

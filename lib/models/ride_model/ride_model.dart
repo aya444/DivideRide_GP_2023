@@ -12,7 +12,7 @@ class RideModel {
   String? payment_method;
 
   List<String>? pending;
-  List<String>? accepted;
+  List<String>? picked_up;
   List<String>? joined;
   List<String>? rejected;
 
@@ -26,7 +26,7 @@ class RideModel {
     this.status,
     this.payment_method,
     this.pending,
-    this.accepted,
+    this.picked_up,
     this.joined,
     this.rejected,
     });
@@ -42,7 +42,7 @@ class RideModel {
     status= json['status'];
     payment_method = json['payment_method'];
     pending= json['pending'];
-    accepted= json['accepted'];
+    picked_up= json['picked_up'];
     joined= json['joined'];
     rejected = json['rejected'];
     pickup_latlng = LatLng(json['pickup_latlng'].latitude, json['pickup_latlng'].longitude);

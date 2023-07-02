@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/controller/auth_controller.dart';
 import 'package:divide_ride/controller/polyline_handler.dart';
@@ -9,25 +8,20 @@ import 'package:divide_ride/utils/app_colors.dart';
 import 'package:divide_ride/views/decision_screens/decision_screen.dart';
 import 'package:divide_ride/views/driver/driver_profile.dart';
 import 'package:divide_ride/views/ride_requests.dart';
-import 'package:divide_ride/views/user/my_profile.dart';
 import 'package:divide_ride/views/my_rides.dart';
 import 'package:divide_ride/views/payment.dart';
-import 'package:divide_ride/views/rides_view.dart';
 import 'package:divide_ride/widgets/green_button.dart';
 import 'package:divide_ride/widgets/icon_title_widget.dart';
 import 'package:divide_ride/widgets/text_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:geocoding/geocoding.dart' as geoCoding;
 import 'dart:ui' as ui;
-
-
 
 class DriverHomeScreen extends StatefulWidget {
   const DriverHomeScreen({Key? key}) : super(key: key);
@@ -44,7 +38,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   RideController rideController = Get.find<RideController>();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-
   late LatLng destination;
   late LatLng source;
   final Set<Polyline> _polyline = {};
@@ -57,8 +50,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     '**** **** **** 1233',
     '**** **** **** 4352'
   ];
-
-
 
   @override
   void initState() {
@@ -74,9 +65,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     dateController.text = '${date!.day}-${date!.month}-${date!.year}';
 
     loadCustomMarker();
-
   }
-
 
   String dropdownValue = '**** **** **** 8789';
   static const CameraPosition _kGooglePlex = CameraPosition(
@@ -91,39 +80,39 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     return Scaffold(
       drawer: buildDrawer(),
       body: Container(
-          child:Form(
+        child: Form(
           key: formKey,
           child: Stack(
-          children: [
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: GoogleMap(
-                markers: markers,
-                polylines: _polyline,
-                zoomControlsEnabled: false,
-                onMapCreated: (GoogleMapController controller) {
-                  myMapController = controller;
-                  myMapController!.setMapStyle(_mapStyle);
-                },
-                initialCameraPosition: _kGooglePlex,
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: GoogleMap(
+                  markers: markers,
+                  polylines: _polyline,
+                  zoomControlsEnabled: false,
+                  onMapCreated: (GoogleMapController controller) {
+                    myMapController = controller;
+                    myMapController!.setMapStyle(_mapStyle);
+                  },
+                  initialCameraPosition: _kGooglePlex,
+                ),
               ),
-            ),
-             buildProfileTitle(),
-             buildTextField(),
-             showSourceField ? buildTextFieldForSource() : Container(),
-             showDateTimeFields ? buildDateTimeFields() : Container(),
-             showDateTimeFields ? buildMaxSeatsAndPriceFields() : Container(),
-             showDateTimeFields ? buildConfirmButton() : Container(),
-            //buildCurrentLocationIcon(),
-            //buildNotificationIcon(),
-            //buildBottomSheet(),
-          ],
+              buildProfileTitle(),
+              buildTextField(),
+              showSourceField ? buildTextFieldForSource() : Container(),
+              showDateTimeFields ? buildDateTimeFields() : Container(),
+              showDateTimeFields ? buildMaxSeatsAndPriceFields() : Container(),
+              showDateTimeFields ? buildConfirmButton() : Container(),
+              //buildCurrentLocationIcon(),
+              //buildNotificationIcon(),
+              //buildBottomSheet(),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -134,68 +123,70 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       right: 0,
       child: Obx(() => authController.myDriver.value.name == null
           ? Center(
-        child: CircularProgressIndicator(),
-      )
-          : Container(
-        width: Get.width,
-        height: Get.width * 0.5,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        decoration: BoxDecoration(color: Colors.white70),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: authController.myDriver.value.image == null
-                      ? DecorationImage(
-                      image: AssetImage('assets/person.png'),
-                      fit: BoxFit.fill)
-                      : DecorationImage(
-                      image: NetworkImage(
-                          authController.myDriver.value.image!),
-                      fit: BoxFit.fill)),
-            ),
-            const SizedBox(
-              width: 15,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RichText(
-                  text: TextSpan(children: [
-                    TextSpan(
-                        text: 'Welcome back, ',
-                        style:
-                        TextStyle(color: Colors.black, fontSize: 14)),
-                    TextSpan(
-                        text: authController.myDriver.value.name?.substring(0,authController.myDriver.value.name?.indexOf(' ')),
-                        style: TextStyle(
-                            color: Colors.green,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold)),
-                  ]),
-                ),
-                Text(
-                  "Create your ride",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                )
-              ],
+              child: CircularProgressIndicator(),
             )
-          ],
-        ),
-      )),
+          : Container(
+              width: Get.width,
+              height: Get.width * 0.5,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              decoration: BoxDecoration(color: Colors.white70),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: authController.myDriver.value.image == null
+                            ? DecorationImage(
+                                image: AssetImage('assets/person.png'),
+                                fit: BoxFit.fill)
+                            : DecorationImage(
+                                image: NetworkImage(
+                                    authController.myDriver.value.image!),
+                                fit: BoxFit.fill)),
+                  ),
+                  const SizedBox(
+                    width: 15,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      RichText(
+                        text: TextSpan(children: [
+                          TextSpan(
+                              text: 'Welcome back, ',
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 14)),
+                          TextSpan(
+                              text: authController.myDriver.value.name
+                                  ?.substring(
+                                      0,
+                                      authController.myDriver.value.name
+                                          ?.indexOf(' ')),
+                              style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold)),
+                        ]),
+                      ),
+                      Text(
+                        "Create your ride",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            )),
     );
   }
-
-
 
   TimeOfDay startTime = TimeOfDay(hour: 0, minute: 0);
 
@@ -206,7 +197,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   TextEditingController priceController = TextEditingController();
   TextEditingController maxSeatsController = TextEditingController();
   TextEditingController startTimeController = TextEditingController();
-
 
   bool showSourceField = false;
   bool showDateTimeFields = false;
@@ -241,14 +231,14 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           readOnly: true,
           onTap: () async {
             Prediction? p =
-            await authController.showGoogleAutoComplete(context);
+                await authController.showGoogleAutoComplete(context);
 
             String selectedPlace = p!.description!;
 
             destinationController.text = selectedPlace;
 
             List<geoCoding.Location> locations =
-            await geoCoding.locationFromAddress(selectedPlace);
+                await geoCoding.locationFromAddress(selectedPlace);
 
             destination =
                 LatLng(locations.first.latitude, locations.first.longitude);
@@ -264,12 +254,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
             myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                 CameraPosition(target: destination, zoom: 14)
-              //17 is new zoom level
-            ));
+                //17 is new zoom level
+                ));
 
-            if(mounted) setState(() {
-              showSourceField = true;
-            });
+            if (mounted)
+              setState(() {
+                showSourceField = true;
+              });
           },
           style: GoogleFonts.poppins(
             fontSize: 16,
@@ -294,7 +285,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
-
   Widget buildTextFieldForSource() {
     return Positioned(
       top: 230, //170
@@ -317,11 +307,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           controller: sourceController,
           readOnly: true,
           onTap: () async {
-
             //buildSourceSheet();
             Get.back();
             Prediction? p =
-            await authController.showGoogleAutoComplete(context);
+                await authController.showGoogleAutoComplete(context);
 
             String place = p!.description!;
 
@@ -345,10 +334,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
             myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                 CameraPosition(target: source, zoom: 14)));
-            if(mounted) setState(() {
-              showDateTimeFields = true;
-            });
-
+            if (mounted)
+              setState(() {
+                showDateTimeFields = true;
+              });
           },
           style: GoogleFonts.poppins(
             fontSize: 16,
@@ -372,7 +361,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
-  Widget buildDateTimeFields(){
+  Widget buildDateTimeFields() {
     return Positioned(
       top: 290, //170
       left: 20, //20
@@ -398,13 +387,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               _selectDate(context);
             },
           ),
-
           iconTitleContainer(
               path: 'assets/time.png',
               text: 'Start Time',
               controller: startTimeController,
               isReadOnly: true,
-              width : 170,
+              width: 170,
               validator: (input) {
                 if (input.isEmpty) {
                   Get.snackbar('Warning', "Time is required.",
@@ -422,7 +410,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
-  Widget buildMaxSeatsAndPriceFields(){
+  Widget buildMaxSeatsAndPriceFields() {
     return Positioned(
       top: 340, //170
       left: 20, //20
@@ -459,7 +447,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                         blurRadius: 10)
                   ],
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(width: 1, color: AppColors.genderTextColor),
+                  border:
+                      Border.all(width: 1, color: AppColors.genderTextColor),
                 ),
                 // decoration: BoxDecoration(
                 //
@@ -471,8 +460,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                 // ),
                 child: DropdownButton(
                   isExpanded: true,
-                  underline: Container(
-                  ),
+                  underline: Container(),
                   borderRadius: BorderRadius.circular(10),
                   icon: Image.asset('assets/arrowDown.png'),
                   elevation: 16,
@@ -480,38 +468,37 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                     fontWeight: FontWeight.w400,
                     color: AppColors.blackColor,
                   ),
-
                   value: maxSeats,
                   onChanged: (String? newValue) {
-                    if(mounted) setState(
-                          () {
-                        maxSeats = newValue!;
-                      },
-                    );
+                    if (mounted)
+                      setState(
+                        () {
+                          maxSeats = newValue!;
+                        },
+                      );
                   },
                   items: maxSeatsList
-                      .map( (value) => DropdownMenuItem(
-                      value: value,
-                      child: Text(
-                        value,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.blackColor,
-                        ),
-                      ),
-                    )
-                  ).toList(),
+                      .map((value) => DropdownMenuItem(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.blackColor,
+                              ),
+                            ),
+                          ))
+                      .toList(),
                 ),
               ),
-
               iconTitleContainer(
                   path: 'assets/dollarLogo.png',
                   text: 'Price per Seat',
                   type: TextInputType.number,
                   height: 40,
                   controller: priceController,
-                  width : 170,
+                  width: 170,
                   onPress: () {},
                   validator: (String input) {
                     if (input.isEmpty) {
@@ -535,93 +522,87 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       right: 20,
       child: Obx(() => rideController.isRideUploading.value
           ? Center(
-        child: CircularProgressIndicator(),
-      )
-          : greenButton('Create Ride', () {
+              child: CircularProgressIndicator(),
+            )
+          : greenButton(
+              'Create Ride',
+              () {
+                if (!formKey.currentState!.validate()) {
+                  return;
+                }
 
+                Get.defaultDialog(
+                  title: "Are you sure to create this ride ?",
+                  content: Container(),
+                  //barrierDismissible: false,
+                  actions: [
+                    MaterialButton(
+                      onPressed: () {
+                        Get.back();
+                        Map<String, dynamic> rideData = {
+                          'pickup_address': sourceController.text,
+                          'destination_address': destinationController.text,
+                          'date': '${date!.day}-${date!.month}-${date!.year}',
+                          'start_time': startTimeController.text,
+                          'max_seats': maxSeats,
+                          'price_per_seat': priceController.text,
+                          'driver': FirebaseAuth.instance.currentUser!.uid,
+                          'pending': [],
+                          'picked_up': [],
+                          'joined': [],
+                          'rejected': [],
+                          'status': "Upcoming",
+                          'payment_method': '',
+                          'pickup_latlng':
+                              GeoPoint(source!.latitude, source.longitude),
+                          'destination_latlng': GeoPoint(
+                              destination!.latitude, destination.longitude),
+                        };
 
-        if(!formKey.currentState!.validate()){
-          return;
-        }
-
-        Get.defaultDialog(
-          title: "Are you sure to create this ride ?",
-          content: Container(),
-          //barrierDismissible: false,
-          actions: [
-            MaterialButton(
-              onPressed: () {
-
-                Get.back();
-                Map<String, dynamic> rideData = {
-
-                  'pickup_address': sourceController.text,
-                  'destination_address': destinationController.text,
-                  'date': '${date!.day}-${date!.month}-${date!.year}',
-                  'start_time': startTimeController.text,
-                  'max_seats': maxSeats,
-                  'price_per_seat': priceController.text,
-                  'driver': FirebaseAuth.instance.currentUser!.uid,
-                  'pending' : [] ,
-                  'accepted' : [] ,
-                  'joined': [],
-                  'rejected' : [],
-                  'status': "Upcoming",
-                  'payment_method': '',
-                  'pickup_latlng': GeoPoint(source!.latitude, source.longitude),
-                  'destination_latlng': GeoPoint(destination!.latitude, destination.longitude),
-
-                };
-
-                 rideController.isRideUploading(true);
-                 rideController.createRide(rideData)
-                     .then((value) {
-                       print("Ride is done");
-                       resetControllers();
-                       showSourceField = false;
-                       showDateTimeFields = false;
-                       _polyline.clear();
-                       markers.clear();
-                     });
-
+                        rideController.isRideUploading(true);
+                        rideController.createRide(rideData).then((value) {
+                          print("Ride is done");
+                          resetControllers();
+                          showSourceField = false;
+                          showDateTimeFields = false;
+                          _polyline.clear();
+                          markers.clear();
+                        });
+                      },
+                      child: textWidget(
+                        text: 'Confirm',
+                        color: Colors.white,
+                      ),
+                      color: AppColors.greenColor,
+                      shape: StadiumBorder(),
+                    ),
+                    SizedBox(width: 7),
+                    MaterialButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      child: textWidget(
+                        text: 'Cancel',
+                        color: Colors.white,
+                      ),
+                      color: Colors.red,
+                      shape: StadiumBorder(),
+                    ),
+                  ],
+                );
+                //Dialog();
               },
 
-              child: textWidget(
-                text: 'Confirm',
-                color: Colors.white,),
-              color: AppColors.greenColor,
-              shape: StadiumBorder(),
-            ),
-            SizedBox(
-              width:7
-            ),
-            MaterialButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: textWidget(
-                text: 'Cancel',
-                color: Colors.white,),
-              color: Colors.red,
-              shape: StadiumBorder(),
-            ),
-
-          ],
-        );
-        //Dialog();
-      },
-
-        // AwesomeDialog(
-        //   context: context,
-        //   dialogType: DialogType.warning,
-        //   animType: AnimType.topSlide,
-        //   showCloseIcon: true,
-        //   title: "Success",
-        //   desc: "Your ride has been created successfully",
-        //   btnOkOnPress: (){},
-        // );
-
-      )),
+              // AwesomeDialog(
+              //   context: context,
+              //   dialogType: DialogType.warning,
+              //   animType: AnimType.topSlide,
+              //   showCloseIcon: true,
+              //   title: "Success",
+              //   desc: "Your ride has been created successfully",
+              //   btnOkOnPress: (){},
+              // );
+            )),
     );
   }
 
@@ -688,12 +669,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   //each option inside the side drawer
   buildDrawerItem(
       {required String title,
-        required Function onPressed,
-        Color color = Colors.black,
-        double fontSize = 20,
-        FontWeight fontWeight = FontWeight.w700,
-        double height = 45,
-        bool isVisible = false}) {
+      required Function onPressed,
+      Color color = Colors.black,
+      double fontSize = 20,
+      FontWeight fontWeight = FontWeight.w700,
+      double height = 45,
+      bool isVisible = false}) {
     return SizedBox(
       height: height,
       child: ListTile(
@@ -713,13 +694,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             ),
             isVisible
                 ? CircleAvatar(
-              backgroundColor: AppColors.greenColor,
-              radius: 15,
-              child: Text(
-                '1',
-                style: GoogleFonts.poppins(color: Colors.white),
-              ),
-            )
+                    backgroundColor: AppColors.greenColor,
+                    radius: 15,
+                    child: Text(
+                      '1',
+                      style: GoogleFonts.poppins(color: Colors.white),
+                    ),
+                  )
                 : Container()
           ],
         ),
@@ -731,14 +712,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     return Drawer(
       child: Column(
         children: [
-          Obx(() => authController.myDriver.value.name == null ? Center(child: CircularProgressIndicator()) :
-          InkWell(
-            onTap: () {
-              Get.to(() => const DriverProfile());
-            },
-            child: SizedBox(
-              height: 150,
-              child: DrawerHeader(
+          Obx(
+                () => authController.myDriver.value.name == null
+                ? Center(child: CircularProgressIndicator())
+                : InkWell(
+              onTap: () {
+                // Get.to(() => const DriverProfile());
+              },
+              child: SizedBox(
+                height: 150,
+                child: DrawerHeader(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -747,65 +730,131 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: authController.myDriver.value.image == null
-                                ? const DecorationImage(
-                                image: AssetImage('assets/person.png'),
-                                fit: BoxFit.fill)
-                                : DecorationImage(
-                                image: NetworkImage(
-                                    authController.myDriver.value.image!),
-                                fit: BoxFit.fill)),
+                          shape: BoxShape.circle,
+                          image: authController.myDriver.value.image == null
+                              ? const DecorationImage(
+                              image: AssetImage('assets/person.png'),
+                              fit: BoxFit.fill)
+                              : DecorationImage(
+                              image: NetworkImage(authController.myDriver.value.image!),
+                              fit: BoxFit.fill),
+                        ),
                       ),
-                      const SizedBox(
-                        width: 10,
-                      ),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Good Morning, ',
-                                style: GoogleFonts.poppins(
-                                    color: Colors.black.withOpacity(0.28),
-                                    fontSize: 14)),
                             Text(
-                              authController.myDriver.value.name == null
-                                  ? "User"
-                                  : authController.myDriver.value.name!,
+                              'Good Morning, ',
                               style: GoogleFonts.poppins(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
+                                color: Colors.black.withOpacity(0.28),
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              authController.myDriver.value.name == null ? "User" : authController.myDriver.value.name!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
-                            )
+                            ),
                           ],
                         ),
-                      )
+                      ),
                     ],
-                  )),
+                  ),
+                ),
+              ),
             ),
           ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
+          const SizedBox(height: 20),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 30),
             child: Column(
               children: [
-                buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(()=> PaymentScreen())),
-                buildDrawerItem(title: 'Ride Requests', onPressed: () => Get.to(()=> const RideRequests())),
-                buildDrawerItem(title: 'My Rides', onPressed: () => Get.to(()=> const MyRides())),
-                buildDrawerItem(title: 'Settings', onPressed: () {}),
+                buildDrawerItem(
+                  title: 'Payment History',
+                  onPressed: () => Get.to(() => PaymentScreen()),
+                ),
+                Stack(
+                  children: [
+                    buildDrawerItem(
+                      title: 'Ride Requests',
+                      onPressed: () => Get.to(() => RideRequests()),
+                    ),
+                    Positioned(
+                      top: 19,
+                      right: 0,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Obx(
+                                () => Text(
+                              '${rideController.pendingRequests.length}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Stack(
+                  children: [
+                    buildDrawerItem(
+                      title: 'My Rides',
+                      onPressed: () => Get.to(() => const MyRides()),
+                    ),
+                    Positioned(
+                      top: 17,
+                      right: 0,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Obx(
+                                () => Text(
+                              '${rideController.driverCurrentRide.length}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                buildDrawerItem(
+                  title: 'Settings',
+                  onPressed: () => Get.to(() => const DriverProfile()),
+                ),
                 buildDrawerItem(title: 'Support', onPressed: () {}),
-                buildDrawerItem(title: 'Log Out', onPressed: () {
-
-                  FirebaseAuth.instance.signOut();
-                  Get.to(()=> DecisionScreen());
-
-                }),
+                buildDrawerItem(
+                  title: 'Log Out',
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    Get.to(() => DecisionScreen());
+                  },
+                ),
               ],
             ),
           ),
@@ -815,30 +864,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             child: Column(
               children: [
-                buildDrawerItem(
-                    title: 'Do more',
-                    onPressed: () {},
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black.withOpacity(0.15),
-                    height: 20),
-                const SizedBox(
-                  height: 20,
-                ),
-                buildDrawerItem(
-                    title: 'Get food delivery',
-                    onPressed: () {},
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black.withOpacity(0.15),
-                    height: 20),
-                buildDrawerItem(
-                    title: 'Make money driving',
-                    onPressed: () {},
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black.withOpacity(0.15),
-                    height: 20),
                 buildDrawerItem(
                   title: 'Rate us on store',
                   onPressed: () {},
@@ -850,9 +875,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               ],
             ),
           ),
-          const SizedBox(
-            height: 20,
-          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -882,7 +905,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     _polyline.add(Polyline(
       polylineId: PolylineId(placeId),
       visible: true, // this means this line should be visible to the user
-      points: [source,destination], // means from point a (source) to point b (destination) draw a polyline
+      points: [
+        source,
+        destination
+      ], // means from point a (source) to point b (destination) draw a polyline
       color: AppColors.greenColor, // color of polyline
       width: 5,
     ));
@@ -942,10 +968,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
-              if(mounted) setState(() {});
+              if (mounted) setState(() {});
               buildRideConfirmationSheet();
-
-
             },
             child: Container(
               width: Get.width,
@@ -1007,10 +1031,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
-              if(mounted) setState(() {});
+              if (mounted) setState(() {});
               buildRideConfirmationSheet();
-
-
             },
             child: Container(
               width: Get.width,
@@ -1046,7 +1068,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             onTap: () async {
               Get.back();
               Prediction? p =
-              await authController.showGoogleAutoComplete(context);
+                  await authController.showGoogleAutoComplete(context);
 
               String place = p!.description!;
 
@@ -1070,9 +1092,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
-              if(mounted) setState(() {});
+              if (mounted) setState(() {});
               //buildRideConfirmationSheet();
-
             },
             child: Container(
               width: Get.width,
@@ -1247,7 +1268,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
-
   buildPaymentCardWidget() {
     return Container(
       child: Row(
@@ -1269,9 +1289,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             underline: Container(),
             onChanged: (String? value) {
               // This is called when the user selects an item.
-              if(mounted) setState(() {
-                dropdownValue = value!;
-              });
+              if (mounted)
+                setState(() {
+                  dropdownValue = value!;
+                });
             },
             items: list.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
@@ -1286,7 +1307,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   }
 
   void resetControllers() {
-
     destinationController.clear();
     sourceController.clear();
     date = DateTime.now();
@@ -1295,8 +1315,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     priceController.clear();
     maxSeatsController.clear();
     startTimeController.clear();
-    if(mounted) setState(() {});
-
+    if (mounted) setState(() {});
   }
 
   _selectDate(BuildContext context) async {
@@ -1313,8 +1332,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           date!.minute, date!.second);
       dateController.text = '${date!.day}-${date!.month}-${date!.year}';
     }
-    if(mounted) setState(() {
-    });
+    if (mounted) setState(() {});
   }
 
   startTimeMethod(BuildContext context) async {
@@ -1325,10 +1343,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     if (picked != null) {
       startTime = picked;
       startTimeController.text =
-      '${startTime.hourOfPeriod > 9 ? "" : '0'}${startTime.hour > 12 ? '${startTime.hour - 12}' : startTime.hour}:${startTime.minute > 9 ? startTime.minute : '0${startTime.minute}'} ${startTime.hour > 12 ? 'PM' : 'AM'}';
+          '${startTime.hourOfPeriod > 9 ? "" : '0'}${startTime.hour > 12 ? '${startTime.hour - 12}' : startTime.hour}:${startTime.minute > 9 ? startTime.minute : '0${startTime.minute}'} ${startTime.hour > 12 ? 'PM' : 'AM'}';
     }
     print("start ${startTimeController.text}");
-    if(mounted) setState(() {});
+    if (mounted) setState(() {});
   }
 
   Dialog() {
@@ -1336,42 +1354,40 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-            shape: RoundedRectangleBorder( borderRadius: BorderRadius.all(Radius.circular(10)) ),
-            title: Text('Are you sure to create this ride ?'),
-            content: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-
-                MaterialButton(
-                  onPressed: () {},
-                  child: textWidget(
-                    text: 'Confirm',
-                    color: Colors.white,),
-                  color: AppColors.greenColor,
-                  shape: StadiumBorder(),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+          title: Text('Are you sure to create this ride ?'),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              MaterialButton(
+                onPressed: () {},
+                child: textWidget(
+                  text: 'Confirm',
+                  color: Colors.white,
                 ),
-                // SizedBox(
-                //   width: 5,
-                // ),
+                color: AppColors.greenColor,
+                shape: StadiumBorder(),
+              ),
+              // SizedBox(
+              //   width: 5,
+              // ),
 
-                MaterialButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  child: textWidget(
-                    text: 'Cancel',
-                    color: Colors.white,),
-                  color: Colors.red,
-                  shape: StadiumBorder(),
+              MaterialButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: textWidget(
+                  text: 'Cancel',
+                  color: Colors.white,
                 ),
-              ],
-            ),
+                color: Colors.red,
+                shape: StadiumBorder(),
+              ),
+            ],
+          ),
         );
       },
     );
   }
-
-
-
-
 }

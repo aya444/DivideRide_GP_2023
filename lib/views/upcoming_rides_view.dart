@@ -1,9 +1,6 @@
-import 'package:divide_ride/widgets/ride_card.dart';
 import 'package:divide_ride/widgets/upcoming_rides_for_driver.dart';
-import 'package:divide_ride/widgets/rides_cards.dart';
 import 'package:divide_ride/widgets/upcoming_rides_for_user.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../shared preferences/shared_pref.dart';
 import '../utils/app_constants.dart';
