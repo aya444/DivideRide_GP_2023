@@ -66,7 +66,11 @@ class _RideBoxState extends State<RideBox> {
       },
       child: Container(
         width: double.maxFinite,
-        height: widget.showCarDetails || widget.showOptions ? 278 : 238,
+        height: widget.showCarDetails ||
+                widget.showOptions ||
+                widget.showStartOption
+            ? 288
+            : 245,
         padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
         decoration: BoxDecoration(
           color: AppColors.whiteColor,
