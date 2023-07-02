@@ -21,8 +21,6 @@ import 'package:path/path.dart' as Path;
 import '../views/driver/car_registration/car_registration_template.dart';
 import '../views/driver/profile_setup.dart';
 
-
-
 class AuthController extends GetxController {
   String userUid = '';
   var verId = '';
@@ -34,9 +32,12 @@ class AuthController extends GetxController {
 
   //bool isLoginAsDriver = true;
 
-  var myUser= UserModel().obs;   /// all information of user is stored in myUser
-  var myDriver= DriverModel().obs;  /// all information of driver is stored in myDriver
+  var myUser = UserModel().obs;
 
+  /// all information of user is stored in myUser
+  var myDriver = DriverModel().obs;
+
+  /// all information of driver is stored in myDriver
 
   storeUserCard(String number, String expiry, String cvv, String name) async {
     await FirebaseFirestore.instance
@@ -53,38 +54,13 @@ class AuthController extends GetxController {
   getUserCards() {
     FirebaseFirestore.instance
         .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid).collection('cards')
-        .snapshots().listen((event) {
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('cards')
+        .snapshots()
+        .listen((event) {
       userCards.value = event.docs;
     });
   }
-
-
-//   CountdownController countdownController = CountdownController();
-//   TextEditingController otpEditingController = TextEditingController();
-//   var messageOtpCode = ''.obs;
-//
-//   @override
-//   void onInit() async {
-//     super.onInit();
-//     print(await SmsAutoFill().getAppSignature);
-//     // Listen for SMS OTP
-//     await SmsAutoFill().listenForCode();
-//   }
-//
-//   @override
-//   void onReady() {
-//     super.onReady();
-//     countdownController.start();
-//   }
-//
-//   @override
-//   void onClose() {
-//     super.onClose();
-//     otpEditingController.dispose();
-//     SmsAutoFill().unregisterListener();
-//   }
-
 
   phoneAuth(String phone) async {
     try {
@@ -119,7 +95,7 @@ class AuthController extends GetxController {
   verifyOtp(String otpNumber) async {
     log("Called");
     PhoneAuthCredential credential =
-    PhoneAuthProvider.credential(verificationId: verId, smsCode: otpNumber);
+        PhoneAuthProvider.credential(verificationId: verId, smsCode: otpNumber);
 
     log("LogedIn");
 
@@ -130,13 +106,9 @@ class AuthController extends GetxController {
     });
   }
 
-  // var isDecided = false;
   var isDecided = false;
 
   decideRoute() {
-    // if (isDecided) {
-    //   return;
-    // }
     isDecided = true;
     print("called");
 
@@ -150,33 +122,30 @@ class AuthController extends GetxController {
           .collection('users')
           .doc(user.uid)
           .get()
-          .then((value) async{
+          .then((value) async {
+        ///isLoginAsDriver == true means navigate it to driver module
+        bool isLoginAsDriver =
+            await CacheHelper.getData(key: AppConstants.decisionKey) ?? false;
 
-               ///isLoginAsDriver == true means navigate it to driver module
-              bool isLoginAsDriver = await CacheHelper.getData(key: AppConstants.decisionKey) ?? false ;
-
-              if (isLoginAsDriver) {
-                if (value.exists) {
-                  print("Driver HOme Screen");
-                  Get.offAll(() => DriverHomeScreen());
-                } else {
-                  Get.offAll(() => DriverProfileSetup());
-                }
-              } else {
-                if (value.exists) {
-                  Get.offAll(() => HomeScreen());
-                } else {
-                  Get.offAll(() => ProfileSettingScreen());
-                }
-              }
-
+        if (isLoginAsDriver) {
+          if (value.exists) {
+            print("Driver HOme Screen");
+            Get.offAll(() => DriverHomeScreen());
+          } else {
+            Get.offAll(() => DriverProfileSetup());
+          }
+        } else {
+          if (value.exists) {
+            Get.offAll(() => HomeScreen());
+          } else {
+            Get.offAll(() => ProfileSettingScreen());
+          }
+        }
       }).catchError((e) {
         print("Error while decideRoute is $e");
       });
     }
   }
-
-
 
   uploadImage(File image) async {
     String imageUrl = '';
@@ -187,7 +156,7 @@ class AuthController extends GetxController {
     UploadTask uploadTask = reference.putFile(image);
     TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
     await taskSnapshot.ref.getDownloadURL().then(
-          (value) {
+      (value) {
         imageUrl = value;
         print("Download URL: $value");
       },
@@ -197,16 +166,16 @@ class AuthController extends GetxController {
   }
 
   storeUserInfo(
-      File? selectedImage,
-      String name,
-      String home,
-      String business,
-      String shop, {
-        String url = '',
-        LatLng? homeLatLng,
-        LatLng? businessLatLng,
-        LatLng? shoppingLatLng,
-      }) async {
+    File? selectedImage,
+    String name,
+    String home,
+    String business,
+    String shop, {
+    String url = '',
+    LatLng? homeLatLng,
+    LatLng? businessLatLng,
+    LatLng? shoppingLatLng,
+  }) async {
     String url_new = url;
     if (selectedImage != null) {
       url_new = await uploadImage(selectedImage);
@@ -220,17 +189,15 @@ class AuthController extends GetxController {
       'shopping_address': shop,
       'home_latlng': GeoPoint(homeLatLng!.latitude, homeLatLng.longitude),
       'business_latlng':
-      GeoPoint(businessLatLng!.latitude, businessLatLng.longitude),
+          GeoPoint(businessLatLng!.latitude, businessLatLng.longitude),
       'shopping_latlng':
-      GeoPoint(shoppingLatLng!.latitude, shoppingLatLng.longitude),
-    },SetOptions(merge: true)).then((value) {
+          GeoPoint(shoppingLatLng!.latitude, shoppingLatLng.longitude),
+    }, SetOptions(merge: true)).then((value) {
       isProfileUploading(false);
 
       Get.to(() => HomeScreen());
     });
   }
-
-
 
   //this function shows user information on their profile, snapshots to capture any changes on real time
   //it calls UserModel instance to assert the value of the current user to this instance
@@ -258,59 +225,47 @@ class AuthController extends GetxController {
       context: context,
       mode: Mode.overlay,
       apiKey: kGoogleApiKey,
-      components: [
-        new Component(Component.country, "eg")
-      ],
+      components: [new Component(Component.country, "eg")],
       //restrict the search to egypt
-      types: [
-        // "street_number",
-        // "street_address",
-        // "route",
-        // "locality",
-        // "sublocality"
-      ],
+      types: [],
       hint: "Search City",
     );
     return p;
   }
 
   Future<LatLng> buildLatLngFromAddress(String place) async {
-    List<geoCoding.Location> locations = await geoCoding.locationFromAddress(place);
+    List<geoCoding.Location> locations =
+        await geoCoding.locationFromAddress(place);
     return LatLng(locations.first.latitude, locations.first.longitude);
   }
 
- //NEW
+  //NEW
   storeDriverProfile(
-      File? selectedImage,
-      String name,
-      String email, {
-        String url = '',
-
-      }) async {
+    File? selectedImage,
+    String name,
+    String email, {
+    String url = '',
+  }) async {
     String url_new = url;
     if (selectedImage != null) {
       url_new = await uploadImage(selectedImage);
     }
     String uid = FirebaseAuth.instance.currentUser!.uid;
-    FirebaseFirestore.instance.collection('users').doc(uid).set({
-      'image': url_new,
-      'name': name,
-      'email': email,
-      'isDriver': true
-    },SetOptions(merge: true)).then((value) {
+    FirebaseFirestore.instance.collection('users').doc(uid).set(
+        {'image': url_new, 'name': name, 'email': email, 'isDriver': true},
+        SetOptions(merge: true)).then((value) {
       isProfileUploading(false);
 
-      Get.off(()=> CarRegistrationTemplate());
+      Get.off(() => CarRegistrationTemplate());
     });
   }
 
   storeDriverInfo(
-      File? selectedImage,
-      String name,
-      String email, {
-        String url = '',
-
-      }) async {
+    File? selectedImage,
+    String name,
+    String email, {
+    String url = '',
+  }) async {
     String url_new = url;
     if (selectedImage != null) {
       url_new = await uploadImage(selectedImage);
@@ -320,25 +275,26 @@ class AuthController extends GetxController {
       'image': url_new,
       'name': name,
       'email': email,
-    },SetOptions(merge: true)).then((value) {
+    }, SetOptions(merge: true)).then((value) {
       isProfileUploading(false);
 
-      Get.off(()=> DriverHomeScreen());
+      Get.off(() => DriverHomeScreen());
     });
   }
 
-
-  Future<bool> uploadCarEntry(Map<String,dynamic> carData)async{
+  Future<bool> uploadCarEntry(Map<String, dynamic> carData) async {
     bool isUploaded = false;
     String uid = FirebaseAuth.instance.currentUser!.uid;
 
-    await FirebaseFirestore.instance.collection('users').doc(uid).set(carData,SetOptions(merge: true));
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .set(carData, SetOptions(merge: true));
 
     isUploaded = true;
 
     return isUploaded;
   }
-
 
   //this function shows user information on their profile, snapshots to capture any changes on real time
   //it calls UserModel instance to assert the value of the current user to this instance
@@ -353,4 +309,3 @@ class AuthController extends GetxController {
     });
   }
 }
-

@@ -5,24 +5,21 @@ import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class LoginScreen extends StatefulWidget {
-  const  LoginScreen({Key? key}) : super(key: key);
-
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final countryPicker = const FlCountryCodePicker(/*showSearchBar: true*/);
 
-   final countryPicker = const FlCountryCodePicker(/*showSearchBar: true*/);
+  CountryCode countryCode =
+      CountryCode(name: 'Egypt', code: "eg", dialCode: "+20");
 
-  CountryCode countryCode = CountryCode(name: 'Egypt', code: "eg", dialCode: "+20");
-
-
-  onSubmit(String? input){
-    Get.to(()=>OtpVerificationScreen(countryCode.dialCode+input!));
+  onSubmit(String? input) {
+    Get.to(() => OtpVerificationScreen(countryCode.dialCode + input!));
   }
 
   @override
@@ -35,30 +32,19 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               greenIntroWidget(),
-
-              const SizedBox(height: 50,),
-
-              loginWidget(countryCode,()async{
-
+              const SizedBox(
+                height: 50,
+              ),
+              loginWidget(countryCode, () async {
                 final code = await countryPicker.showPicker(context: context);
-                if (code != null)  countryCode = code;
-                setState(() {
-
-                });
-              },onSubmit),
-
-
+                if (code != null) countryCode = code;
+                setState(() {});
+              }, onSubmit),
             ],
           ),
         ),
       ),
     );
   }
-  // @override
-  // void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  //   super.debugFillProperties(properties);
-  //   properties.add(DiagnosticsProperty<bool>('countryPicker', countryPicker));
-  // }
 }

@@ -19,8 +19,12 @@ class RideModel {
   LatLng? pickup_latlng;
   LatLng? destination_latlng;
 
-
-  RideModel({this.pickup_address,this.destination_address,this.start_time ,this.date,this.max_seats,
+  RideModel({
+    this.pickup_address,
+    this.destination_address,
+    this.start_time,
+    this.date,
+    this.max_seats,
     this.price_per_seat,
     this.driver,
     this.status,
@@ -29,27 +33,25 @@ class RideModel {
     this.picked_up,
     this.joined,
     this.rejected,
-    });
+  });
 
-  RideModel.fromJson(Map<String,dynamic> json) {
-    pickup_address= json['pickup_address'];
-    destination_address= json['destination_address'];
-    start_time= json['start_time'];
-    date= json['date'];
-    max_seats= json['max_seats'];
-    price_per_seat= json['price_per_seat'];
-    driver= json['driver'];
-    status= json['status'];
+  RideModel.fromJson(Map<String, dynamic> json) {
+    pickup_address = json['pickup_address'];
+    destination_address = json['destination_address'];
+    start_time = json['start_time'];
+    date = json['date'];
+    max_seats = json['max_seats'];
+    price_per_seat = json['price_per_seat'];
+    driver = json['driver'];
+    status = json['status'];
     payment_method = json['payment_method'];
-    pending= json['pending'];
-    picked_up= json['picked_up'];
-    joined= json['joined'];
+    pending = json['pending'];
+    picked_up = json['picked_up'];
+    joined = json['joined'];
     rejected = json['rejected'];
-    pickup_latlng = LatLng(json['pickup_latlng'].latitude, json['pickup_latlng'].longitude);
-    destination_latlng = LatLng(json['destination_latlng'].latitude, json['destination_latlng'].longitude);
-
+    pickup_latlng =
+        LatLng(json['pickup_latlng'].latitude, json['pickup_latlng'].longitude);
+    destination_latlng = LatLng(json['destination_latlng'].latitude,
+        json['destination_latlng'].longitude);
   }
-
-
-
 }

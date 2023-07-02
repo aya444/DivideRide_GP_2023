@@ -6,9 +6,10 @@ import 'package:divide_ride/utils/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+
 List<LatLng> polyList = [];
 bool internet = true;
-getPolylines(LatLng pickUp,LatLng drop) async {
+getPolylines(LatLng pickUp, LatLng drop) async {
   polyList.clear();
   String pickLat = '';
   String pickLng = '';
@@ -25,7 +26,7 @@ getPolylines(LatLng pickUp,LatLng drop) async {
         'https://maps.googleapis.com/maps/api/directions/json?origin=$pickLat%2C$pickLng&destination=$dropLat%2C$dropLng&avoid=ferries|indoor&transit_mode=bus&mode=driving&key=${AppConstants.kGoogleApiKey}'));
     if (response.statusCode == 200) {
       var steps =
-      jsonDecode(response.body)['routes'][0]['overview_polyline']['points'];
+          jsonDecode(response.body)['routes'][0]['overview_polyline']['points'];
       decodeEncodedPolyline(steps);
     } else {
       debugPrint(response.body);
@@ -88,13 +89,13 @@ class PointLatLng {
   /// [longitude].
   ///
   const PointLatLng(double latitude, double longitude)
-  // ignore: unnecessary_null_comparison
+      // ignore: unnecessary_null_comparison
       : assert(latitude != null),
-  // ignore: unnecessary_null_comparison
+        // ignore: unnecessary_null_comparison
         assert(longitude != null),
-  // ignore: unnecessary_this, prefer_initializing_formals
+        // ignore: unnecessary_this, prefer_initializing_formals
         this.latitude = latitude,
-  // ignore: unnecessary_this, prefer_initializing_formals
+        // ignore: unnecessary_this, prefer_initializing_formals
         this.longitude = longitude;
 
   /// The latitude in degrees.

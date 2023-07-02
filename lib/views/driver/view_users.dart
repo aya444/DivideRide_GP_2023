@@ -1,6 +1,5 @@
 import 'package:divide_ride/utils/app_colors.dart';
 import 'package:divide_ride/views/driver/driver_home.dart';
-import 'package:divide_ride/views/tabs/ongoing_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -10,7 +9,6 @@ import '../../controller/ride_controller.dart';
 import '../../shared preferences/shared_pref.dart';
 import '../../utils/app_constants.dart';
 import '../../widgets/users_cards.dart';
-import '../my_rides.dart';
 
 class ViewUsers extends StatefulWidget {
   final String rideId;
@@ -57,9 +55,9 @@ class _ViewUsersState extends State<ViewUsers> {
                 child: ElevatedButton(
                   onPressed: () {
                     rideController.endRide(widget.rideId);
-                     rideController.updateOngoingDriverRide();
-                     rideController.updateOngoingUserRide();
-                     Get.to(() => DriverHomeScreen());
+                    rideController.updateOngoingDriverRide();
+                    rideController.updateOngoingUserRide();
+                    Get.to(() => DriverHomeScreen());
                   },
                   style: ElevatedButton.styleFrom(
                     primary: Colors.red,

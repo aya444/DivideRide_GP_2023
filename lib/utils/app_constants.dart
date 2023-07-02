@@ -1,4 +1,4 @@
-class AppConstants{
+class AppConstants {
   static const kGoogleApiKey = "YOUR-Map-KEy";
 
   static const String helloNiceToMeetYou = 'Hello, nice to meet you!';
@@ -13,5 +13,4 @@ class AppConstants{
   static const String resendCode = 'Resend code in';
   static const String seconds = 'seconds';
   static const String decisionKey = "isLoginAsDriver";
-
 }

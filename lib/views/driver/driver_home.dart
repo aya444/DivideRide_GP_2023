@@ -106,9 +106,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               showDateTimeFields ? buildDateTimeFields() : Container(),
               showDateTimeFields ? buildMaxSeatsAndPriceFields() : Container(),
               showDateTimeFields ? buildConfirmButton() : Container(),
-              //buildCurrentLocationIcon(),
-              //buildNotificationIcon(),
-              //buildBottomSheet(),
             ],
           ),
         ),
@@ -417,19 +414,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       right: 20, //20
       child: Column(
         children: [
-          // Container(
-          //   alignment: Alignment.topLeft,
-          //   child: Text(
-          //     'Who can invite?',
-          //     style: TextStyle(
-          //       fontSize: 16,
-          //       fontWeight: FontWeight.w700,
-          //     ),
-          //   ),
-          // ),
-          // SizedBox(
-          //   height: Get.height * 0.005,
-          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -450,14 +434,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                   border:
                       Border.all(width: 1, color: AppColors.genderTextColor),
                 ),
-                // decoration: BoxDecoration(
-                //
-                //   // borderRadius: BorderRadius.circular(8),
-                //    border: Border(
-                //         bottom: BorderSide(color: Colors.black.withOpacity(0.8),width: 0.6)
-                //     )
-                //
-                // ),
                 child: DropdownButton(
                   isExpanded: true,
                   underline: Container(),
@@ -590,18 +566,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                     ),
                   ],
                 );
-                //Dialog();
               },
-
-              // AwesomeDialog(
-              //   context: context,
-              //   dialogType: DialogType.warning,
-              //   animType: AnimType.topSlide,
-              //   showCloseIcon: true,
-              //   title: "Success",
-              //   desc: "Your ride has been created successfully",
-              //   btnOkOnPress: (){},
-              // );
             )),
     );
   }
@@ -713,64 +678,68 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       child: Column(
         children: [
           Obx(
-                () => authController.myDriver.value.name == null
+            () => authController.myDriver.value.name == null
                 ? Center(child: CircularProgressIndicator())
                 : InkWell(
-              onTap: () {
-                // Get.to(() => const DriverProfile());
-              },
-              child: SizedBox(
-                height: 150,
-                child: DrawerHeader(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: authController.myDriver.value.image == null
-                              ? const DecorationImage(
-                              image: AssetImage('assets/person.png'),
-                              fit: BoxFit.fill)
-                              : DecorationImage(
-                              image: NetworkImage(authController.myDriver.value.image!),
-                              fit: BoxFit.fill),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
+                    onTap: () {
+                      // Get.to(() => const DriverProfile());
+                    },
+                    child: SizedBox(
+                      height: 150,
+                      child: DrawerHeader(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Text(
-                              'Good Morning, ',
-                              style: GoogleFonts.poppins(
-                                color: Colors.black.withOpacity(0.28),
-                                fontSize: 14,
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: authController.myDriver.value.image ==
+                                        null
+                                    ? const DecorationImage(
+                                        image: AssetImage('assets/person.png'),
+                                        fit: BoxFit.fill)
+                                    : DecorationImage(
+                                        image: NetworkImage(authController
+                                            .myDriver.value.image!),
+                                        fit: BoxFit.fill),
                               ),
                             ),
-                            Text(
-                              authController.myDriver.value.name == null ? "User" : authController.myDriver.value.name!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Good Morning, ',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.black.withOpacity(0.28),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    authController.myDriver.value.name == null
+                                        ? "User"
+                                        : authController.myDriver.value.name!,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ],
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
                             ),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
           ),
           const SizedBox(height: 20),
           Container(
@@ -799,7 +768,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                         ),
                         child: Center(
                           child: Obx(
-                                () => Text(
+                            () => Text(
                               '${rideController.pendingRequests.length}',
                               style: TextStyle(
                                 color: Colors.white,
@@ -830,7 +799,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                         ),
                         child: Center(
                           child: Obx(
-                                () => Text(
+                            () => Text(
                               '${rideController.driverCurrentRide.length}',
                               style: TextStyle(
                                 color: Colors.white,
@@ -880,7 +849,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       ),
     );
   }
-
 
   late Uint8List markIcons;
 
@@ -1093,7 +1061,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               myMapController!.animateCamera(CameraUpdate.newCameraPosition(
                   CameraPosition(target: source, zoom: 14)));
               if (mounted) setState(() {});
-              //buildRideConfirmationSheet();
             },
             child: Container(
               width: Get.width,
@@ -1369,10 +1336,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                 color: AppColors.greenColor,
                 shape: StadiumBorder(),
               ),
-              // SizedBox(
-              //   width: 5,
-              // ),
-
               MaterialButton(
                 onPressed: () {
                   Get.back();

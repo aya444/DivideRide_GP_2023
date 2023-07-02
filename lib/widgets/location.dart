@@ -22,7 +22,7 @@ class Location extends StatelessWidget {
         const SizedBox(width: 3),
         ...List.generate(
           18,
-              (index) {
+          (index) {
             return Expanded(
               child: Container(
                 height: 2,

@@ -19,7 +19,8 @@ class RideRequests extends StatelessWidget {
           bottom: TabBar(
               isScrollable: true,
               labelColor: AppColors.whiteColor,
-              labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              labelStyle:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               unselectedLabelColor: Colors.grey[300],
               unselectedLabelStyle: const TextStyle(fontSize: 14),
               indicatorWeight: 3.0,
@@ -29,22 +30,16 @@ class RideRequests extends StatelessWidget {
                 Tab(text: 'Accepted'),
                 Tab(text: 'Rejected'),
                 // Tab(icon: Icon(Icons.settings )),
-              ]
-          ),
+              ]),
         ),
         body: Column(
           children: [
             Expanded(
-              child: TabBarView(
-                  children: [
-
-                    PendingTab(),
-                    AcceptedTab(),
-                    RejectedTab(),
-
-                  ]
-
-              ),
+              child: TabBarView(children: [
+                PendingTab(),
+                AcceptedTab(),
+                RejectedTab(),
+              ]),
             )
           ],
         ),

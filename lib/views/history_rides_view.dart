@@ -13,15 +13,13 @@ class HistoryRidesView extends StatefulWidget {
 }
 
 class _UpcomingRidesViewState extends State<HistoryRidesView> {
-
   bool isDriver = false;
-
 
   @override
   void initState() {
     // TODO: implement initState
 
-    isDriver = CacheHelper.getData(key: AppConstants.decisionKey) ?? false ;
+    isDriver = CacheHelper.getData(key: AppConstants.decisionKey) ?? false;
 
     print(isDriver.toString());
 
@@ -34,17 +32,12 @@ class _UpcomingRidesViewState extends State<HistoryRidesView> {
       resizeToAvoidBottomInset: false,
       body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-              children:  [
-
-                SizedBox(height: 30),
-                Expanded(
-                  child: isDriver ? HistoryRidesForDriver() : HistoryRidesForUser(),
-
-                )
-              ]
-          )
-      ),
+          child: Column(children: [
+            SizedBox(height: 30),
+            Expanded(
+              child: isDriver ? HistoryRidesForDriver() : HistoryRidesForUser(),
+            )
+          ])),
     );
   }
 }

@@ -16,8 +16,7 @@ class RideDetailsView extends StatefulWidget {
   RideDetailsView(this.ride, this.driver);
 
   @override
-  State<RideDetailsView> createState() =>
-      _RideDetailsViewState();
+  State<RideDetailsView> createState() => _RideDetailsViewState();
 }
 
 class _RideDetailsViewState extends State<RideDetailsView> {
@@ -97,13 +96,15 @@ class _RideDetailsViewState extends State<RideDetailsView> {
                       height: 50,
                       child: Row(
                         children: List<Widget>.generate(
-                          joinedUsers.length, (index) {
-                            DocumentSnapshot user = rideController.allUsers.firstWhere((e)=> e.id == joinedUsers[index]);
+                          joinedUsers.length,
+                          (index) {
+                            DocumentSnapshot user = rideController.allUsers
+                                .firstWhere((e) => e.id == joinedUsers[index]);
                             String image = '';
 
-                            try{
+                            try {
                               image = user.get('image');
-                            }catch(e){
+                            } catch (e) {
                               image = '';
                             }
                             return Padding(
@@ -182,26 +183,17 @@ class _RideDetailsViewState extends State<RideDetailsView> {
                 ),
               ]
             ] else ...[
-
               Row(
                 children: [
                   Expanded(
                     child: InkWell(
                         onTap: () {
-
-                          if(pendingUsers.contains(userId)){
-
-                          }
-                          else if(joinedUsers.contains(userId)){
-
-                          }
-                          else if(rejectedUsers.contains(userId)){
-
-                          }
-                          else if(widget.ride.get('max_seats') == "0 seats"){
-
-                          }
-                          else{
+                          if (pendingUsers.contains(userId)) {
+                          } else if (joinedUsers.contains(userId)) {
+                          } else if (rejectedUsers.contains(userId)) {
+                          } else if (widget.ride.get('max_seats') ==
+                              "0 seats") {
+                          } else {
                             Get.defaultDialog(
                               title: "Are you sure to join this ride ?",
                               content: Container(),
@@ -209,7 +201,6 @@ class _RideDetailsViewState extends State<RideDetailsView> {
                               actions: [
                                 MaterialButton(
                                   onPressed: () {
-
                                     Get.back();
 
                                     //rideController.isRequestLoading(true);
@@ -217,7 +208,6 @@ class _RideDetailsViewState extends State<RideDetailsView> {
                                         widget.ride, userId);
 
                                     //Get.back();
-
                                   },
                                   child: textWidget(
                                     text: 'Confirm',
@@ -241,28 +231,41 @@ class _RideDetailsViewState extends State<RideDetailsView> {
                               ],
                             );
                           }
-
-                        }, child: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(13),
-                          color: pendingUsers.contains(userId) ? AppColors.yellow.withOpacity(0.9) : rejectedUsers.contains(userId) ? Colors.red.shade700 : joinedUsers.contains(userId) ? AppColors.greenColor.withOpacity(0.9) : AppColors.greenColor.withOpacity(0.9)
-                      ),
-                      child: Center(
-                          child: Text(
-                            pendingUsers.contains(userId) ? "Pending" : rejectedUsers.contains(userId) ? "Rejected" : joinedUsers.contains(userId) ? "Joined" : widget.ride.get('max_seats')=="0 seats" ? "No seats Available" : "Send Request",
+                        },
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(13),
+                              color: pendingUsers.contains(userId)
+                                  ? AppColors.yellow.withOpacity(0.9)
+                                  : rejectedUsers.contains(userId)
+                                      ? Colors.red.shade700
+                                      : joinedUsers.contains(userId)
+                                          ? AppColors.greenColor
+                                              .withOpacity(0.9)
+                                          : AppColors.greenColor
+                                              .withOpacity(0.9)),
+                          child: Center(
+                              child: Text(
+                            pendingUsers.contains(userId)
+                                ? "Pending"
+                                : rejectedUsers.contains(userId)
+                                    ? "Rejected"
+                                    : joinedUsers.contains(userId)
+                                        ? "Joined"
+                                        : widget.ride.get('max_seats') ==
+                                                "0 seats"
+                                            ? "No seats Available"
+                                            : "Send Request",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
                               fontSize: 16,
                             ),
-                          )
-                      ),
-                    )
-                    ),
+                          )),
+                        )),
                   ),
-
-                  if(widget.ride.get('status') == "Ended") ...[
+                  if (widget.ride.get('status') == "Ended") ...[
                     SizedBox(
                       width: 10,
                     ),
@@ -280,13 +283,13 @@ class _RideDetailsViewState extends State<RideDetailsView> {
                                   color: Colors.grey.withOpacity(0.4),
                                   spreadRadius: 0.1,
                                   blurRadius: 60,
-                                  offset:
-                                  Offset(0, 1), // changes position of shadow
+                                  offset: Offset(
+                                      0, 1), // changes position of shadow
                                 ),
                               ],
                               borderRadius: BorderRadius.circular(13)),
-                          padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
                           child: Center(
                             child: Text(
                               'Pay',
