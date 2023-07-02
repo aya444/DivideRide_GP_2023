@@ -24,7 +24,7 @@ class _OngoingRideForDriverState extends State<OngoingRideForDriver> {
     print(
         'length of currentRides = ${rideController.driverCurrentRide.length}');
     print("driver Id = ${FirebaseAuth.instance.currentUser!.uid} ");
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp){
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       rideController.getOngoingRideForDriver();
       rideController.getMyDocument();
     });

@@ -10,17 +10,12 @@ class PendingTab extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-              children:  [
-
-                SizedBox(height: 30),
-                Expanded(
-                  child: PendingRequestsView(),
-
-                )
-              ]
-          )
-      ),
+          child: Column(children: [
+            SizedBox(height: 30),
+            Expanded(
+              child: PendingRequestsView(),
+            )
+          ])),
     );
   }
 }

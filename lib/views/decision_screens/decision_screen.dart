@@ -43,7 +43,6 @@ class _DecisionScreenState extends State<DecisionScreen> {
               height: 20,
             ),
             DecisionButton('assets/customer.png', 'Login As User', () {
-              //authController.isLoginAsDriver = false;
               CacheHelper.saveData(key: AppConstants.decisionKey, val: false);
               Get.to(() => LoginScreen());
             }, Get.width * 0.8),

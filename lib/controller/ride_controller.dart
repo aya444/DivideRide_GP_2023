@@ -47,7 +47,6 @@ class RideController extends GetxController {
   var isUsersLoading = false.obs;
   var isRequestLoading = false.obs;
 
-
   // Main Functionalities
   ///this method is for storing Ride Info into Firebase
   createRide(Map<String, dynamic> rideData) async {
@@ -68,7 +67,7 @@ class RideController extends GetxController {
     try {
       // Get a reference to the ride document in Firestore to update to it
       DocumentReference rideRef =
-      FirebaseFirestore.instance.collection('rides').doc(rideId);
+          FirebaseFirestore.instance.collection('rides').doc(rideId);
 
       // Add the userId to the pending array in the ride document
       await rideRef.update({
@@ -90,7 +89,7 @@ class RideController extends GetxController {
     try {
       // Get a reference to the ride document in Firestore to update to it
       DocumentReference rideRef =
-      FirebaseFirestore.instance.collection('rides').doc(rideId);
+          FirebaseFirestore.instance.collection('rides').doc(rideId);
 
       // Add the userId to the pending array in the ride document
       await rideRef.update({
@@ -112,7 +111,7 @@ class RideController extends GetxController {
     try {
       // Get a reference to the ride document in Firestore to update to it
       DocumentReference rideRef =
-      FirebaseFirestore.instance.collection('rides').doc(rideId);
+          FirebaseFirestore.instance.collection('rides').doc(rideId);
 
       // Add the userId to the pending array in the ride document
       await rideRef.update({
@@ -221,19 +220,21 @@ class RideController extends GetxController {
   /// this method is to add userId tho pickup array this shows that the users has rode the car with the driver
   pickedUp(String rideId, String userId) async {
     try {
-      DocumentReference rideRef = FirebaseFirestore.instance.collection('rides').doc(rideId);
-      rideRef.update({'picked_up': FieldValue.arrayUnion([userId])});
+      DocumentReference rideRef =
+          FirebaseFirestore.instance.collection('rides').doc(rideId);
+      rideRef.update({
+        'picked_up': FieldValue.arrayUnion([userId])
+      });
     } catch (e) {
       print('Failed to add userId to picked_up array: $e');
     }
   }
 
-
   /// this method find all rides with the sam destination and date given by user then arrange them from the nearest in distance to furthest
   void findAndArrangeRides(Map<String, dynamic> searchRideInfo) {
     String destinationAddress = searchRideInfo['destination_address'];
     String date = searchRideInfo['date'];
-    DateTime currentDateTime  = DateTime.now();
+    DateTime currentDateTime = DateTime.now();
 
     // filter rides based on destination and date
     List filteredRides = allRides.where((ride) {
@@ -244,8 +245,13 @@ class RideController extends GetxController {
       String startTime = ride.get('start_time');
 
       // Parse ride's date and start time
-      DateTime rideDateTime = DateFormat('dd-MM-yyyy hh:mm a').parse('$rideDate $startTime');
-      return rideDestination == destinationAddress && rideDate == date && rideDateTime.isAfter(currentDateTime) && status != 'Cancelled' && status != 'Ended';
+      DateTime rideDateTime =
+          DateFormat('dd-MM-yyyy hh:mm a').parse('$rideDate $startTime');
+      return rideDestination == destinationAddress &&
+          rideDate == date &&
+          rideDateTime.isAfter(currentDateTime) &&
+          status != 'Cancelled' &&
+          status != 'Ended';
     }).toList();
 
     // Sort the filtered rides based on proximity to the source location
@@ -286,7 +292,7 @@ class RideController extends GetxController {
     return degree * pi / 180; // Convert degree to radians
   }
 
- // Updaters
+  // Updaters
   updateOngoingDriverRide() {
     getOngoingRideForDriver();
   }
@@ -357,10 +363,8 @@ class RideController extends GetxController {
 
   ///this method gets length of joined array in ride entity
   getJoinedArrayLength(String rideId) async {
-    final rideSnapshot = await FirebaseFirestore.instance
-        .collection('rides')
-        .doc(rideId)
-        .get();
+    final rideSnapshot =
+        await FirebaseFirestore.instance.collection('rides').doc(rideId).get();
 
     if (rideSnapshot.exists && rideSnapshot.data() != null) {
       final joinedArray = rideSnapshot.data()!['joined'] as List<dynamic>;
@@ -371,10 +375,8 @@ class RideController extends GetxController {
   }
 
   getJoinedArray(String rideId) async {
-    final rideSnapshot = await FirebaseFirestore.instance
-        .collection('rides')
-        .doc(rideId)
-        .get();
+    final rideSnapshot =
+        await FirebaseFirestore.instance.collection('rides').doc(rideId).get();
 
     if (rideSnapshot.exists && rideSnapshot.data() != null) {
       final joinedArray = rideSnapshot.data()!['joined'] as List<dynamic>;
@@ -407,18 +409,20 @@ class RideController extends GetxController {
       return driverId.contains(FirebaseAuth.instance.currentUser!.uid) &&
           rideDateTime.isAfter(previous30Minutes) &&
           rideDateTime.isBefore(next3Hours) &&
-          status != 'Cancelled' && status != 'Ended' && status != 'Started';
+          status != 'Cancelled' &&
+          status != 'Ended' &&
+          status != 'Started';
     }).toList();
 
     // Assign filtered rides to currentRide array
     driverCurrentRide.assignAll(tempArray);
   }
 
-
   /// this method get all rides with still active date and arrange them from the nearest date to the furthest for driver
   getUpcomingRidesForDriver() {
     DateTime currentDate = DateTime.now();
-    DateTime next3Hours = currentDate.add(Duration(hours: 3, minutes: 1)); // Get the next 5 hours from the current date
+    DateTime next3Hours = currentDate.add(Duration(
+        hours: 3, minutes: 1)); // Get the next 5 hours from the current date
 
     List tempArray = ridesICreated.where((ride) {
       String driverId = ride['driver'];
@@ -438,7 +442,8 @@ class RideController extends GetxController {
       // Filter rides that occur after the next 5 hours from the current date
       return driverId.contains(FirebaseAuth.instance.currentUser!.uid) &&
           rideDateTime.isAfter(next3Hours) &&
-          status != 'Cancelled' && status != 'Ended';
+          status != 'Cancelled' &&
+          status != 'Ended';
     }).toList();
 
     // Sort rides by nearest date and time
@@ -479,14 +484,15 @@ class RideController extends GetxController {
     driverHistory.assignAll(tempArray);
   }
 
-
   /// this method gets the current ride for the user
-  getOngoingRideForUser() { //TODO change to accepted array
+  getOngoingRideForUser() {
+    //TODO change to accepted array
     List tempArray = ridesIJoined.where((ride) {
       List<dynamic> joinedUsers = ride['joined'];
       String status = ride['status'];
 
-      return joinedUsers.contains(FirebaseAuth.instance.currentUser!.uid) && status == 'Started';
+      return joinedUsers.contains(FirebaseAuth.instance.currentUser!.uid) &&
+          status == 'Started';
     }).toList();
 
     // Assign filtered rides to currentRide array
@@ -496,7 +502,8 @@ class RideController extends GetxController {
   /// this method get all rides with still active date and arrange them from the nearest date to the furthest for user
   getUpcomingRidesForUser() {
     DateTime currentDate = DateTime.now();
-    DateTime next3Hours = currentDate.add(Duration(hours: 3, minutes: 1)); // Get the next 5 hours from the current date
+    DateTime next3Hours = currentDate.add(Duration(
+        hours: 3, minutes: 1)); // Get the next 5 hours from the current date
 
     List tempArray = ridesIJoined.where((ride) {
       List<dynamic> joinedUsers = ride['joined'];
@@ -518,7 +525,7 @@ class RideController extends GetxController {
           rideDateTime.isAfter(next3Hours) &&
           status == 'Upcoming';
     }).toList();
-    
+
     // Sort rides by nearest date and time
     tempArray.sort((a, b) {
       DateTime rideDateTimeA = DateFormat('dd-MM-yyyy hh:mm a')
@@ -552,7 +559,10 @@ class RideController extends GetxController {
       );
 
       // Filter rides that have already occurred
-      return joinedUsers.contains(FirebaseAuth.instance.currentUser!.uid) && (status == 'Ended' || status == 'Cancelled' || rideDateTime.isBefore(currentDate));
+      return joinedUsers.contains(FirebaseAuth.instance.currentUser!.uid) &&
+          (status == 'Ended' ||
+              status == 'Cancelled' ||
+              rideDateTime.isBefore(currentDate));
     }).toList();
 
     // Sort rides by nearest date and time
@@ -618,8 +628,8 @@ class RideController extends GetxController {
     String currentDriverId = FirebaseAuth.instance.currentUser!.uid;
     List<String> userIds = [];
 
-    QuerySnapshot<Map<String, dynamic>> querySnapshot =
-    await FirebaseFirestore.instance
+    QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore
+        .instance
         .collection('users')
         .doc(currentDriverId)
         .collection('requests')
@@ -627,18 +637,22 @@ class RideController extends GetxController {
         .where('status', isEqualTo: 'Accepted')
         .get();
 
-    for (QueryDocumentSnapshot<Map<String, dynamic>> document
-    in querySnapshot.docs as List<QueryDocumentSnapshot<Map<String, dynamic>>>) {
+    for (QueryDocumentSnapshot<Map<String, dynamic>> document in querySnapshot
+        .docs as List<QueryDocumentSnapshot<Map<String, dynamic>>>) {
       if (document.data() != null) {
         userIds.add(document.data()!['user_id']);
       }
     }
 
-    List<DocumentSnapshot<Map<String, dynamic>>> userSnapshots = []; // Create a local list
+    List<DocumentSnapshot<Map<String, dynamic>>> userSnapshots =
+        []; // Create a local list
 
     for (String userId in userIds) {
       DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-      await FirebaseFirestore.instance.collection('users').doc(userId).get();
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .get();
       if (userSnapshot.exists) {
         userSnapshots.add(userSnapshot);
       }
@@ -647,7 +661,6 @@ class RideController extends GetxController {
     // Update the userSnapshots in the RideController instance
     this.userSnapshots.assignAll(userSnapshots);
   }
-
 
   /// this method gets all pending requests that the driver is yet to accept or reject
   getPendingRequests() {

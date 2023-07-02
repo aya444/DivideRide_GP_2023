@@ -4,8 +4,8 @@ import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
-Widget loginWidget(CountryCode countryCode, Function onCountryChange,Function onSubmit) {
+Widget loginWidget(
+    CountryCode countryCode, Function onCountryChange, Function onSubmit) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 20),
     child: Column(
@@ -67,7 +67,7 @@ Widget loginWidget(CountryCode countryCode, Function onCountryChange,Function on
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 10),
                   child: TextField(
-                    onSubmitted: (String? input)=> onSubmit(input),
+                    onSubmitted: (String? input) => onSubmit(input),
                     decoration: InputDecoration(
                         hintStyle: GoogleFonts.poppins(
                             fontSize: 12, fontWeight: FontWeight.normal),

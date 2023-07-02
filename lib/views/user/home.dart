@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:divide_ride/controller/auth_controller.dart';
@@ -179,7 +178,6 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController dateController = TextEditingController();
   bool showSourceField = false;
   bool showDateTimeFields = false;
-
 
   // Widget for destination field
   Widget buildTextField() {
@@ -475,62 +473,64 @@ class _HomeScreenState extends State<HomeScreen> {
     return Drawer(
       child: Column(
         children: [
-          Obx(() => authController.myUser.value.name == null ? Center(child: CircularProgressIndicator()) :
-          InkWell(
-            onTap: () {
-              Get.to(() => const MyProfile());
-            },
-            child: SizedBox(
-              height: 150,
-              child: DrawerHeader(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: authController.myUser.value.image == null
-                                ? const DecorationImage(
-                                image: AssetImage('assets/person.png'),
-                                fit: BoxFit.fill)
-                                : DecorationImage(
-                                image: NetworkImage(
-                                    authController.myUser.value.image!),
-                                fit: BoxFit.fill)),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Good Morning, ',
-                                style: GoogleFonts.poppins(
-                                    color: Colors.black.withOpacity(0.28),
-                                    fontSize: 14)),
-                            Text(
-                              authController.myUser.value.name == null
-                                  ? "User"
-                                  : authController.myUser.value.name!,
-                              style: GoogleFonts.poppins(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  )),
-            ),
-          ),
+          Obx(
+            () => authController.myUser.value.name == null
+                ? Center(child: CircularProgressIndicator())
+                : InkWell(
+                    onTap: () {
+                      Get.to(() => const MyProfile());
+                    },
+                    child: SizedBox(
+                      height: 150,
+                      child: DrawerHeader(
+                          child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: authController.myUser.value.image == null
+                                    ? const DecorationImage(
+                                        image: AssetImage('assets/person.png'),
+                                        fit: BoxFit.fill)
+                                    : DecorationImage(
+                                        image: NetworkImage(
+                                            authController.myUser.value.image!),
+                                        fit: BoxFit.fill)),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Good Morning, ',
+                                    style: GoogleFonts.poppins(
+                                        color: Colors.black.withOpacity(0.28),
+                                        fontSize: 14)),
+                                Text(
+                                  authController.myUser.value.name == null
+                                      ? "User"
+                                      : authController.myUser.value.name!,
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      )),
+                    ),
+                  ),
           ),
           const SizedBox(
             height: 20,
@@ -539,39 +539,51 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.symmetric(horizontal: 30),
             child: Column(
               children: [
-                buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(() => PaymentScreen())),
-                Stack(children: [
-                  buildDrawerItem(title: 'All Rides', onPressed: () => Get.to(()=> const MyRides())),
-                  Obx(() => rideController.userCurrentRide.length == 1
-                      ? Positioned(
-                    top: 16,
-                    right: 0,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '1',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                      : SizedBox()
-                  ),
-                ],),
-                buildDrawerItem(title: 'Settings', onPressed: () {Get.to(() => const MyProfile());}),
+                buildDrawerItem(
+                    title: 'Payment History',
+                    onPressed: () => Get.to(() => PaymentScreen())),
+                Stack(
+                  children: [
+                    buildDrawerItem(
+                        title: 'All Rides',
+                        onPressed: () => Get.to(() => const MyRides())),
+                    Obx(() => rideController.userCurrentRide.length == 1
+                        ? Positioned(
+                            top: 16,
+                            right: 0,
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '1',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox()),
+                  ],
+                ),
+                buildDrawerItem(
+                    title: 'Settings',
+                    onPressed: () {
+                      Get.to(() => const MyProfile());
+                    }),
                 buildDrawerItem(title: 'Support', onPressed: () {}),
-                buildDrawerItem(title: 'Log Out', onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                  Get.to(() => DecisionScreen());}),
+                buildDrawerItem(
+                    title: 'Log Out',
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+                      Get.to(() => DecisionScreen());
+                    }),
               ],
             ),
           ),
@@ -609,143 +621,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // buildDrawer() {
-  //   return Drawer(
-  //     child: Column(
-  //       children: [
-  //         Obx(() => authController.myUser.value.name == null ? Center(child: CircularProgressIndicator()) :
-  //         InkWell(
-  //           onTap: () {
-  //             Get.to(() => const MyProfile());
-  //           },
-  //           child: SizedBox(
-  //             height: 150,
-  //             child: DrawerHeader(
-  //                 child: Row(
-  //               crossAxisAlignment: CrossAxisAlignment.center,
-  //               mainAxisAlignment: MainAxisAlignment.spaceAround,
-  //               children: [
-  //                 Container(
-  //                   width: 80,
-  //                   height: 80,
-  //                   decoration: BoxDecoration(
-  //                       shape: BoxShape.circle,
-  //                       image: authController.myUser.value.image == null
-  //                           ? const DecorationImage(
-  //                               image: AssetImage('assets/person.png'),
-  //                               fit: BoxFit.fill)
-  //                           : DecorationImage(
-  //                               image: NetworkImage(
-  //                                   authController.myUser.value.image!),
-  //                               fit: BoxFit.fill)),
-  //                 ),
-  //                 const SizedBox(
-  //                   width: 10,
-  //                 ),
-  //                 Expanded(
-  //                   child: Column(
-  //                     crossAxisAlignment: CrossAxisAlignment.start,
-  //                     mainAxisAlignment: MainAxisAlignment.center,
-  //                     children: [
-  //                       Text('Good Morning, ',
-  //                           style: GoogleFonts.poppins(
-  //                               color: Colors.black.withOpacity(0.28),
-  //                               fontSize: 14)),
-  //                       Text(
-  //                         authController.myUser.value.name == null
-  //                             ? "User"
-  //                             : authController.myUser.value.name!,
-  //                         style: GoogleFonts.poppins(
-  //                             fontSize: 24,
-  //                             fontWeight: FontWeight.bold,
-  //                             color: Colors.black),
-  //                         overflow: TextOverflow.ellipsis,
-  //                         maxLines: 1,
-  //                       )
-  //                     ],
-  //                   ),
-  //                 )
-  //               ],
-  //             )),
-  //           ),
-  //         ),
-  //         ),
-  //         const SizedBox(
-  //           height: 20,
-  //         ),
-  //         Container(
-  //           padding: EdgeInsets.symmetric(horizontal: 30),
-  //           child: Column(
-  //             children: [
-  //               buildDrawerItem(title: 'Payment History', onPressed: () => Get.to(() => PaymentScreen())),
-  //               Stack(children: [
-  //                 buildDrawerItem(title: 'All Rides', onPressed: () => Get.to(()=> const MyRides())),
-  //                 if(rideController.userCurrentRide.length == 1)
-  //                   Positioned(
-  //                     top: 8,
-  //                     right: 0,
-  //                     child: Container(
-  //                       width: 20,
-  //                       height: 20,
-  //                       decoration: BoxDecoration(
-  //                         color: Colors.green,
-  //                         shape: BoxShape.circle,
-  //                       ),
-  //                       child: Center(
-  //                         child: Text(
-  //                           '1',
-  //                           style: TextStyle(
-  //                             color: Colors.white,
-  //                             fontWeight: FontWeight.bold,
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   )
-  //               ],),
-  //               buildDrawerItem(title: 'Settings', onPressed: () {Get.to(() => const MyProfile());}),
-  //               buildDrawerItem(title: 'Support', onPressed: () {}),
-  //               buildDrawerItem(title: 'Log Out', onPressed: () {
-  //                     FirebaseAuth.instance.signOut();
-  //                     Get.to(() => DecisionScreen());}),
-  //             ],
-  //           ),
-  //         ),
-  //         Spacer(),
-  //         Divider(),
-  //         Container(
-  //           padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-  //           child: Column(
-  //             children: [
-  //               buildDrawerItem(
-  //                   title: 'Do more',
-  //                   onPressed: () {},
-  //                   fontSize: 12,
-  //                   fontWeight: FontWeight.bold,
-  //                   color: Colors.black.withOpacity(0.15),
-  //                   height: 20),
-  //               const SizedBox(
-  //                 height: 20,
-  //               ),
-  //               buildDrawerItem(
-  //                 title: 'Rate us on store',
-  //                 onPressed: () {},
-  //                 fontSize: 12,
-  //                 fontWeight: FontWeight.w500,
-  //                 color: Colors.black.withOpacity(0.15),
-  //                 height: 20,
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //         const SizedBox(
-  //           height: 20,
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   late Uint8List markIcons;
 

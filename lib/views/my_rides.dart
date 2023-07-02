@@ -49,10 +49,7 @@ class _MyRidesState extends State<MyRides> {
               tabs: [
                 Tab(text: 'Ongoing'),
                 Tab(text: 'Upcoming'),
-                // Tab(text: isDriver ? 'Upcoming' : 'Available Rides'),
-                // if(isDriver)...[] else...[ Tab(text: 'Joined') ],
                 Tab(text: 'History'),
-                // Tab(icon: Icon(Icons.settings )),
               ]),
         ),
         body: Column(
@@ -61,7 +58,6 @@ class _MyRidesState extends State<MyRides> {
               child: TabBarView(children: [
                 OngoingTab(),
                 UpcomingTab(),
-                // if(isDriver)... [] else...[JoinedTab()],
                 HistoryTab(),
               ]),
             )
@@ -71,82 +67,3 @@ class _MyRidesState extends State<MyRides> {
     );
   }
 }
-
-// class CustomAppBar extends StatefulWidget {
-//   const CustomAppBar({Key? key}) : super(key: key);
-//
-//   @override
-//   State<CustomAppBar> createState() => _CustomAppBarState();
-// }
-//
-// class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderStateMixin{
-//
-//   late TabController tabController;
-//
-//   @override
-//   void initState() {
-//     // TODO: implement initState
-//     super.initState();
-//     tabController = TabController(length: 3, vsync: this);
-//   }
-//
-//   // @override
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         backgroundColor: Colors.white,
-//         title: Text('T A B B A R' , style: TextStyle(fontWeight: FontWeight.bold ) ),
-//         centerTitle: true,
-//         bottom: TabBar(
-//             controller: tabController,
-//             labelColor: AppColors.greenColor,
-//             labelStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//             unselectedLabelColor: Colors.grey,
-//             unselectedLabelStyle: const TextStyle(fontSize: 18),
-//             indicatorWeight: 3.0,
-//             tabs: [
-//               Tab(text: 'Upcoming'),
-//               Tab(text: 'Upcoming'),
-//               Tab(icon: Icon(Icons.person )),
-//             ]
-//         ),
-//       ),
-//       body: Column(
-//         children: [
-//           SizedBox(height:40),
-//           // Center( child: Text('T A B B A R') ),
-//           TabBar(
-//               // controller: tabController,
-//               labelColor: AppColors.greenColor,
-//               labelStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//               unselectedLabelColor: Colors.grey,
-//               unselectedLabelStyle: const TextStyle(fontSize: 18),
-//               indicatorWeight: 3.0,
-//               tabs: [
-//                 Tab(text: 'Upcoming'),
-//                 Tab(icon: Icon(Icons.settings )),
-//                 Tab(icon: Icon(Icons.person )),
-//               ]
-//           ),
-//           Expanded(
-//             child: TabBarView(children: [
-//
-//               UpcomingTab(),
-//               PastTab(),
-//
-//               Container(
-//                   color: Colors.yellow,
-//                   child: Center(
-//                     child: Text('3st TAB'),
-//                   )
-//               ),
-//             ]
-//
-//             ),
-//           )
-//         ],
-//       ),
-//     );
-//   }
-// }

@@ -20,7 +20,7 @@ Widget greenButton(String title, Function onPressed) {
 
 Widget greenCustomButton(String title, Function onPressed) {
   return MaterialButton(
-    minWidth: Get.width*0.4,
+    minWidth: Get.width * 0.4,
     height: 50,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
     color: AppColors.greenColor,

@@ -10,17 +10,12 @@ class RejectedTab extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-              children:  [
-
-                SizedBox(height: 30),
-                Expanded(
-                  child: RejectedRequestsView(),
-
-                )
-              ]
-          )
-      ),
+          child: Column(children: [
+            SizedBox(height: 30),
+            Expanded(
+              child: RejectedRequestsView(),
+            )
+          ])),
     );
   }
 }

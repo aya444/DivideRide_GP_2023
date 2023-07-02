@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
-
   String phoneNumber;
   OtpVerificationScreen(this.phoneNumber);
 
@@ -15,8 +14,6 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-
-
   AuthController authController = Get.find<AuthController>();
 
   @override
@@ -31,19 +28,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
-
           children: [
-
-
             Stack(
               children: [
                 greenIntroWidget(),
-
                 Positioned(
                   top: 60,
                   left: 30,
                   child: InkWell(
-                    onTap: (){
+                    onTap: () {
                       Get.back();
                     },
                     child: Container(
@@ -53,22 +46,20 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         shape: BoxShape.circle,
                         color: Colors.white,
                       ),
-                      child: Icon(Icons.arrow_back,color: AppColors.greenColor,size: 20,),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: AppColors.greenColor,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ),
-
-
               ],
             ),
-
             SizedBox(
               height: 50,
             ),
-
             otpVerificationWidget(),
-
-
           ],
         ),
       ),

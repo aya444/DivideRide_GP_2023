@@ -9,7 +9,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as Path;
 
 class MyProfile extends StatefulWidget {
   const MyProfile({Key? key}) : super(key: key);

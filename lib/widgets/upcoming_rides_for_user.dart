@@ -20,7 +20,8 @@ class _UpcomingRidesForUserState extends State<UpcomingRidesForUser> {
 
   @override
   void initState() {
-    print('length of upcomingRides = ${rideController.upcomingRidesForUser.length}');
+    print(
+        'length of upcomingRides = ${rideController.upcomingRidesForUser.length}');
     print('length of allRides = ${rideController.allRides.length}');
     print('length of allUsers = ${rideController.allUsers.length}');
     print("driver Id = ${FirebaseAuth.instance.currentUser!.uid} ");
@@ -37,7 +38,8 @@ class _UpcomingRidesForUserState extends State<UpcomingRidesForUser> {
           shrinkWrap: true,
           itemBuilder: (context, index) {
             DocumentSnapshot driver = rideController.allUsers.firstWhere((e) =>
-                rideController.upcomingRidesForUser[index].get('driver') == e.id);
+                rideController.upcomingRidesForUser[index].get('driver') ==
+                e.id);
 
             return Padding(
                 padding: EdgeInsets.symmetric(vertical: 13),

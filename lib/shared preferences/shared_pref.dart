@@ -13,9 +13,8 @@ class CacheHelper {
   }
 
   static dynamic getData({required String key}) {
-    dynamic data = sharedPreferences.get(key) ;
+    dynamic data = sharedPreferences.get(key);
 
-    // if (data != null) {
     if (data is String) {
       return data.toString();
     } else if (data is int) {
@@ -27,8 +26,9 @@ class CacheHelper {
     }
     // }
   }
+
   /// islogin as driver ----> true / false
-  static  saveData({required String key, required dynamic val}) {
+  static saveData({required String key, required dynamic val}) {
     if (val is bool) {
       return sharedPreferences.setBool(key, val);
     } else if (val is String) {

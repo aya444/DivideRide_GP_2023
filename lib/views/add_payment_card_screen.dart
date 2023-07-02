@@ -1,18 +1,17 @@
 import 'package:divide_ride/controller/auth_controller.dart';
 import 'package:divide_ride/utils/app_colors.dart';
-import 'package:divide_ride/views/payment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/credit_card_brand.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:get/get.dart';
 import '../widgets/green_intro_widget.dart';
+
 class AddPaymentCardScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     return AddPaymentCardScreenState();
   }
 }
-
 
 class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
   String cardNumber = '';
@@ -25,9 +24,6 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
   OutlineInputBorder? border;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   AuthController authController = Get.find<AuthController>();
-
-
-
 
   @override
   void initState() {
@@ -48,14 +44,11 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
         body: Stack(
           children: [
             greenIntroWidgetWithoutLogos(title: 'Add Card'),
-
-
             Column(
-
               children: <Widget>[
-
-                SizedBox(height: 150,),
-
+                SizedBox(
+                  height: 150,
+                ),
                 CreditCardWidget(
                   cardNumber: cardNumber,
                   expiryDate: expiryDate,
@@ -70,9 +63,7 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                   isSwipeGestureEnabled: true,
                   onCreditCardWidgetChange:
                       (CreditCardBrand creditCardBrand) {},
-                  customCardTypeIcons: <CustomCardTypeIcon>[
-
-                  ],
+                  customCardTypeIcons: <CustomCardTypeIcon>[],
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -127,18 +118,14 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                         const SizedBox(
                           height: 20,
                         ),
-
-
-
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               primary: AppColors.greenColor
-                            // backgroundColor: const Color(0xff1b447b),
-                          ),
+                              // backgroundColor: const Color(0xff1b447b),
+                              ),
                           child: Container(
                             margin: const EdgeInsets.all(12),
                             child: const Text(
@@ -151,18 +138,17 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
                               ),
                             ),
                           ),
-                          onPressed: ()async {
+                          onPressed: () async {
                             if (formKey.currentState!.validate()) {
                               print('valid!');
 
-
-                              await authController.storeUserCard(cardNumber, expiryDate, cvvCode, cardHolderName);
+                              await authController.storeUserCard(cardNumber,
+                                  expiryDate, cvvCode, cardHolderName);
 
                               //Get.to(() => PaymentScreen());
 
-                              Get.snackbar('Success', 'Your card is stored successfully');
-
-
+                              Get.snackbar('Success',
+                                  'Your card is stored successfully');
                             } else {
                               print('invalid!');
                             }
@@ -175,8 +161,7 @@ class AddPaymentCardScreenState extends State<AddPaymentCardScreen> {
               ],
             ),
           ],
-        )
-    );
+        ));
   }
 
   void onCreditCardModelChange(CreditCardModel? creditCardModel) {

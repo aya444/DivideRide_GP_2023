@@ -21,18 +21,24 @@ class _NearestRidesCardsState extends State<NearestRidesCards> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => ListView.builder(
+    return Obx(
+      () => ListView.builder(
         shrinkWrap: true,
-        //physics: NeverScrollableScrollPhysics(),
         itemCount: rideController.filteredAndArrangedRides.length,
         itemBuilder: (context, index) {
-          DocumentSnapshot ride = rideController.filteredAndArrangedRides[index];
-          DocumentSnapshot driver = rideController.allUsers.firstWhere( (e) => ride.get('driver') == e.id );
+          DocumentSnapshot ride =
+              rideController.filteredAndArrangedRides[index];
+          DocumentSnapshot driver = rideController.allUsers
+              .firstWhere((e) => ride.get('driver') == e.id);
 
-          return Padding( padding: EdgeInsets.symmetric(vertical: 13 , horizontal: 2),
-
-            child: RideBox( ride: ride, driver: driver, showCarDetails: false, shouldNavigate: true,),
-
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: 13, horizontal: 2),
+            child: RideBox(
+              ride: ride,
+              driver: driver,
+              showCarDetails: false,
+              shouldNavigate: true,
+            ),
           );
         },
       ),

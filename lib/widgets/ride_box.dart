@@ -66,10 +66,7 @@ class _RideBoxState extends State<RideBox> {
       },
       child: Container(
         width: double.maxFinite,
-        height: widget.showCarDetails ||
-                widget.showOptions
-            ? 278
-            : 238,
+        height: widget.showCarDetails || widget.showOptions ? 278 : 238,
         padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
         decoration: BoxDecoration(
           color: AppColors.whiteColor,
@@ -95,7 +92,7 @@ class _RideBoxState extends State<RideBox> {
                 ),
               ),
               title: Text(
-                '${widget.driver.get('name')}', //DriverDoc!.get('driver_name')
+                '${widget.driver.get('name')}',
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 style: TextStyle(
@@ -146,7 +143,6 @@ class _RideBoxState extends State<RideBox> {
                                 fontWeight: FontWeight.w600,
                               ),
                               overflow: TextOverflow.ellipsis,
-                              //maxLines: 2,
                             ),
                           ),
                         ),
@@ -533,7 +529,7 @@ class _RideBoxState extends State<RideBox> {
               const SizedBox(height: 7),
               Center(
                 child: Text(
-                  '${widget.ride.get('status')}', //DriverDoc!.get('driver_name')
+                  '${widget.ride.get('status')}',
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: TextStyle(
