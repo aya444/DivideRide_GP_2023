@@ -40,36 +40,10 @@ class _RideDetailsViewState extends State<RideDetailsView> {
     RideController rideController = Get.find<RideController>();
 
     String userId = FirebaseAuth.instance.currentUser!.uid;
-    String maxSeats = widget.ride.get('max_seats');
     List pendingUsers = [];
-
-    try {
-      pendingUsers = widget.ride.get('pending');
-    } catch (e) {
-      pendingUsers = [];
-    }
-
     List joinedUsers = [];
-
-    try {
-      joinedUsers = widget.ride.get('joined');
-    } catch (e) {
-      joinedUsers = [];
-    }
-
     List rejectedUsers = [];
 
-    try {
-      rejectedUsers = widget.ride.get('rejected');
-    } catch (e) {
-      rejectedUsers = [];
-    }
-
-    try {
-      rejectedUsers = widget.ride.get('rejected');
-    } catch (e) {
-      rejectedUsers = [];
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -118,10 +92,7 @@ class _RideDetailsViewState extends State<RideDetailsView> {
               }
               return Column(
                 children: [
-                  RideBox(
-                      ride: widget.ride,
-                      driver: widget.driver,
-                      showCarDetails: true),
+                  RideBox(ride: ride, driver: widget.driver, showCarDetails: true),
                   SizedBox(
                     height: 20,
                   ),
@@ -228,11 +199,14 @@ class _RideDetailsViewState extends State<RideDetailsView> {
                         Expanded(
                           child: InkWell(
                               onTap: () {
-                                if (pendingUsers.contains(userId)) {
-                                } else if (joinedUsers.contains(userId)) {
-                                } else if (rejectedUsers.contains(userId)) {
-                                } else if (widget.ride.get('max_seats') ==
-                                    "0 seats") {
+                                if (pendingUsers.contains(userId))
+                                {
+                                } else if (joinedUsers.contains(userId))
+                                {
+                                } else if (rejectedUsers.contains(userId))
+                                {
+                                } else if (ride.get('max_seats') == "0 seats") {
+
                                 } else {
                                   Get.defaultDialog(
                                     title: "Are you sure to join this ride ?",
@@ -245,7 +219,7 @@ class _RideDetailsViewState extends State<RideDetailsView> {
 
                                           //rideController.isRequestLoading(true);
                                           rideController.requestToJoinRide(
-                                              widget.ride, userId);
+                                              ride, userId);
 
                                           //Get.back();
                                         },
@@ -293,7 +267,7 @@ class _RideDetailsViewState extends State<RideDetailsView> {
                                           ? "Rejected"
                                           : joinedUsers.contains(userId)
                                               ? "Joined"
-                                              : widget.ride.get('max_seats') ==
+                                              : ride.get('max_seats') ==
                                                       "0 seats"
                                                   ? "No seats Available"
                                                   : "Send Request",
@@ -305,7 +279,7 @@ class _RideDetailsViewState extends State<RideDetailsView> {
                                 )),
                               )),
                         ),
-                        if (widget.ride.get('status') == "Ended") ...[
+                        if (ride.get('status') == "Ended") ...[
                           SizedBox(
                             width: 10,
                           ),
