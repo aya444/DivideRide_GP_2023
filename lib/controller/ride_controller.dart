@@ -503,7 +503,7 @@ class RideController extends GetxController {
   getUpcomingRidesForUser() {
     DateTime currentDate = DateTime.now();
     DateTime next3Hours = currentDate.add(Duration(
-        hours: 3, minutes: 1)); // Get the next 5 hours from the current date
+        hours: 3, minutes: 1));
 
     List tempArray = ridesIJoined.where((ride) {
       List<dynamic> joinedUsers = ride['joined'];
