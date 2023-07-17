@@ -21,9 +21,13 @@ DivideRide is a carpooling mobile application that aims to address the challenge
 2. Open the project in your preferred IDE.
 3. Run the application on an Android or iOS emulator/simulator.
 
-## Video
-[![Driver Side Video](https://img.youtube.com/vi/bFMPSR8cAdo/0.jpg)](https://www.youtube.com/watch?v=bFMPSR8cAdo)
-[![Passenger Side Video](https://img.youtube.com/vi/Kw4KABLQnLI/0.jpg)](https://www.youtube.com/watch?v=Kw4KABLQnLI)
+## Application Videos
+- Driver Side
+[![Driver Side Video](https://img.youtube.com/vi/bFMPSR8cAdo/0.jpg)](https://www.youtube.com/watch?v=bFMPSR8cAdo?autoplay=1)
+
+
+- Passenger Side
+[![Passenger Side Video](https://img.youtube.com/vi/Kw4KABLQnLI/0.jpg)](https://www.youtube.com/watch?v=Kw4KABLQnLI?autoplay=1)
 
 ## Dependencies
 - Flutter: v2.2.3 or higher
