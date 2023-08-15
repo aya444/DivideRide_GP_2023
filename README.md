@@ -35,4 +35,4 @@ DivideRide is a carpooling mobile application that aims to address the challenge
 Contributions are welcome! If you find any bugs or have suggestions for improvements, please open an issue or submit a pull request.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU AGPLv3 License - see the [LICENSE](LICENSE) file for details.
