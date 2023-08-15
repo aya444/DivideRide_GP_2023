@@ -306,6 +306,3 @@ provided with the distribution.
  along with this program. If not, see <https://www.gnu.org/licenses/>.
 
  GNU AGPLv3, Source: https://www.gnu.org/licenses/agpl-3.0.en.html
-```
-
-Please ensure to include this full text in your software project, in a file named "LICENSE" or "LICENSE.txt", and make it clear to users how they can access the full license text. Also, remember to include attributions and compliance with the license's terms as specified in the license itself.
